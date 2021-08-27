@@ -1,7 +1,7 @@
 use crate::{
     components, constants,
     events::{ChunkChange, Events, Input},
-    system::{find_pixel_difference, movement},
+    system::{find_pixel_difference, movement, rotate},
     World,
 };
 use itertools::izip;
@@ -12,12 +12,13 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
 ) -> Events {
     let mut events = Events::default();
 
-    for (entity, position, chunk, accepts_input, speed) in izip!(
+    for (entity, position, chunk, accepts_input, speed, facing_direction) in izip!(
         world.entities.iter(),
         world.components.positions.iter_mut(),
         world.components.chunks.iter_mut(),
         world.components.accepts_input.iter(),
-        world.components.speeds.iter()
+        world.components.speeds.iter(),
+        world.components.facing_directions.iter_mut(),
     ) {
         if entity.has_position()
             && entity.has_chunk()
@@ -46,6 +47,39 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                     &mut world.resources.chunk,
                 );
             }
+        }
+
+        if entity.has_facing_direction()
+            && entity.has_accepts_input()
+            && accepts_input.from_player() 
+        {
+            // Already facing that direction?
+            let rotation_needed = !match facing_direction {
+                components::Direction::Up => {
+                    input.has_up()
+                }
+                components::Direction::Right => {
+                    input.has_right()
+                }
+                components::Direction::Down => {
+                    input.has_down()
+                }
+                components::Direction::Left => {
+                    input.has_left()
+                }
+            };
+            if rotation_needed {
+                if input.has_up() {
+                    events |= rotate(facing_direction, components::Direction::Up);
+                } else if input.has_right() {
+                    events |= rotate(facing_direction, components::Direction::Right);
+                } else if input.has_down() {
+                    events |= rotate(facing_direction, components::Direction::Down);
+                } else if input.has_left() {
+                    events |= rotate(facing_direction, components::Direction::Left);
+                }
+            }
+            
         }
     }
 

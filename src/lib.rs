@@ -31,7 +31,7 @@ struct Resources {
 struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) positions: Box<[components::Position; ENTITY_COUNT]>,
     pub(crate) bounding_boxes: Box<[components::BoundingBox; ENTITY_COUNT]>,
-    pub(crate) directions: Box<[components::Direction; ENTITY_COUNT]>,
+    pub(crate) facing_directions: Box<[components::Direction; ENTITY_COUNT]>,
     pub(crate) speeds: Box<[components::Speed; ENTITY_COUNT]>,
     pub(crate) accepts_input: Box<[components::AcceptsInput; ENTITY_COUNT]>,
     pub(crate) movement_delays: Box<[components::MovementDelay; ENTITY_COUNT]>,
@@ -49,7 +49,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
         Self {
             positions: Box::new([components::Position::default(); ENTITY_COUNT]),
             bounding_boxes: Box::new([components::BoundingBox::default(); ENTITY_COUNT]),
-            directions: Box::new([components::Direction::default(); ENTITY_COUNT]),
+            facing_directions: Box::new([components::Direction::default(); ENTITY_COUNT]),
             speeds: Box::new([components::Speed::default(); ENTITY_COUNT]),
             accepts_input: Box::new([components::AcceptsInput::default(); ENTITY_COUNT]),
             movement_delays: Box::new([components::MovementDelay::default(); ENTITY_COUNT]),
@@ -135,7 +135,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             // SAFETY: The index here will always be within the bounds of ENTITY_COUNT.
             *self.entities.get_unchecked_mut(generational_index.index) = Entity::position()
                 | Entity::bounding_box()
-                | Entity::direction()
+                | Entity::facing_direction()
                 | Entity::speed()
                 | Entity::accepts_input()
                 | Entity::chunk()
@@ -157,8 +157,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .get_unchecked_mut(generational_index.index) = components::BoundingBox::new(16, 16);
             *self
                 .components
-                .directions
-                .get_unchecked_mut(generational_index.index) = components::Direction::Up;
+                .facing_directions
+                .get_unchecked_mut(generational_index.index) = components::Direction::Down;
             *self
                 .components
                 .speeds

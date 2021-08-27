@@ -7,6 +7,7 @@ mod event_handler;
 mod find_pixel_difference;
 mod movement;
 mod player_input;
+mod rotate;
 mod toggle_walking_animation_state;
 
 pub(crate) use decrement_movement_delay::decrement_movement_delay;
@@ -18,4 +19,5 @@ pub(crate) use event_handler::event_handler;
 pub(crate) use find_pixel_difference::find_pixel_difference;
 pub(crate) use movement::movement;
 pub(crate) use player_input::player_input;
+pub(crate) use rotate::rotate;
 pub(crate) use toggle_walking_animation_state::toggle_walking_animation_state;

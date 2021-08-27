@@ -4,7 +4,7 @@ bitflags! {
     pub(crate) struct Entity: u16 {
         const POSITION = 0b0000_0000_0000_0001;
         const BOUNDING_BOX = 0b0000_0000_0000_0010;
-        const DIRECTION = 0b0000_0000_0000_0100;
+        const FACING_DIRECTION = 0b0000_0000_0000_0100;
         const SPEED = 0b0000_0000_0000_1000;
         const ACCEPTS_INPUT = 0b0000_0000_0001_0000;
         const MOVEMENT_DELAY = 0b0000_0000_0010_0000;
@@ -35,8 +35,8 @@ impl Entity {
         Self::BOUNDING_BOX
     }
 
-    pub(crate) fn direction() -> Self {
-        Self::DIRECTION
+    pub(crate) fn facing_direction() -> Self {
+        Self::FACING_DIRECTION
     }
 
     pub(crate) fn speed() -> Self {
@@ -95,8 +95,8 @@ impl Entity {
         self.contains(Self::BOUNDING_BOX)
     }
 
-    pub(crate) fn has_direction(&self) -> bool {
-        self.contains(Self::DIRECTION)
+    pub(crate) fn has_facing_direction(&self) -> bool {
+        self.contains(Self::FACING_DIRECTION)
     }
 
     pub(crate) fn has_speed(&self) -> bool {
