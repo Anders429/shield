@@ -1,3 +1,4 @@
+mod collisions;
 mod decrement_movement_delay;
 mod display_hud;
 mod display_sprite;
@@ -10,6 +11,7 @@ mod player_input;
 mod rotate;
 mod toggle_walking_animation_state;
 
+pub(crate) use collisions::collisions;
 pub(crate) use decrement_movement_delay::decrement_movement_delay;
 pub(crate) use display_hud::display_hud;
 pub(crate) use display_sprite::display_sprite;

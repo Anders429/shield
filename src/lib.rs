@@ -309,6 +309,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             }
         }
 
+        events |= system::collisions(self);
+
         events |= system::display_static_sprites(self, canvas, texture_creator, texture_cache);
         events |= system::display_sprites(self, canvas, texture_creator, texture_cache);
         events |= system::display_hud(self, canvas, texture_creator, texture_cache);
