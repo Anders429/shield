@@ -17,11 +17,19 @@ impl Default for Flags {
 }
 
 bitflags! {
-    pub(crate) struct Input : u8 {
-        const UP = 0b0000_0001;
-        const RIGHT = 0b0000_0010;
-        const DOWN = 0b0000_0100;
-        const LEFT = 0b0000_1000;
+    pub(crate) struct Input : u16 {
+        const UP = 0b0000_0000_0000_0001;
+        const RIGHT = 0b0000_0000_0000_0010;
+        const DOWN = 0b0000_0000_0000_0100;
+        const LEFT = 0b0000_0000_0000_1000;
+        const A = 0b0000_0000_0001_0000;
+        const B = 0b0000_0000_0010_0000;
+        const X = 0b0000_0000_0100_0000;
+        const Y = 0b0000_0000_1000_0000;
+        const L = 0b0000_0001_0000_0000;
+        const R = 0b0000_0010_0000_0000;
+        const START = 0b0000_0100_0000_0000;
+        const SELECT = 0b0000_1000_0000_0000;
     }
 }
 
@@ -46,6 +54,38 @@ impl Input {
 
     pub(crate) fn has_left(&self) -> bool {
         self.contains(Input::LEFT)
+    }
+
+    pub(crate) fn has_a(&self) -> bool {
+        self.contains(Input::A)
+    }
+
+    pub(crate) fn has_b(&self) -> bool {
+        self.contains(Input::B)
+    }
+
+    pub(crate) fn has_x(&self) -> bool {
+        self.contains(Input::X)
+    }
+
+    pub(crate) fn has_y(&self) -> bool {
+        self.contains(Input::Y)
+    }
+
+    pub(crate) fn has_l(&self) -> bool {
+        self.contains(Input::L)
+    }
+
+    pub(crate) fn has_r(&self) -> bool {
+        self.contains(Input::R)
+    }
+
+    pub(crate) fn has_start(&self) -> bool {
+        self.contains(Input::START)
+    }
+
+    pub(crate) fn has_select(&self) -> bool {
+        self.contains(Input::SELECT)
     }
 }
 
