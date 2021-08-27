@@ -1,23 +1,24 @@
 use bitflags::bitflags;
 
 bitflags! {
-    pub(crate) struct Entity: u16 {
-        const POSITION = 0b0000_0000_0000_0001;
-        const BOUNDING_BOX = 0b0000_0000_0000_0010;
-        const FACING_DIRECTION = 0b0000_0000_0000_0100;
-        const SPEED = 0b0000_0000_0000_1000;
-        const ACCEPTS_INPUT = 0b0000_0000_0001_0000;
-        const MOVEMENT_DELAY = 0b0000_0000_0010_0000;
-        const CHUNK = 0b0000_0000_0100_0000;
-        const SPRITESHEET_1X1 = 0b0000_0000_1000_0000;
-        const PALETTE = 0b0000_0001_0000_0000;
-        const STATIC_SPRITE = 0b0000_0010_0000_0000;
-        const HEALTH_POINTS = 0b0000_0100_0000_0000;
-        const PLAYER = 0b0000_1000_0000_0000;
-        const WALKING_TIMER = 0b0001_0000_0000_0000;
-        const WALKING = 0b0010_0000_0000_0000;
-        const WALKING_ANIMATION_STATE = 0b0100_0000_0000_0000;
-        const DAMAGE = 0b1000_0000_0000_0000;
+    pub(crate) struct Entity: u32 {
+        const POSITION = 0b0000_0000_0000_0000_0000_0000_0000_0001;
+        const BOUNDING_BOX = 0b0000_0000_0000_0000_0000_0000_0000_0010;
+        const FACING_DIRECTION = 0b0000_0000_0000_0000_0000_0000_0000_0100;
+        const SPEED = 0b0000_0000_0000_0000_0000_0000_0000_1000;
+        const ACCEPTS_INPUT = 0b0000_0000_0000_0000_0000_0000_0001_0000;
+        const MOVEMENT_DELAY = 0b0000_0000_0000_0000_0000_0000_0010_0000;
+        const CHUNK = 0b0000_0000_0000_0000_0000_0000_0100_0000;
+        const SPRITESHEET_1X1 = 0b0000_0000_0000_0000_0000_0000_1000_0000;
+        const PALETTE = 0b0000_0000_0000_0000_0000_0001_0000_0000;
+        const STATIC_SPRITE = 0b0000_0000_0000_0000_0000_0010_0000_0000;
+        const HEALTH_POINTS = 0b0000_0000_0000_0000_0000_0100_0000_0000;
+        const PLAYER = 0b0000_0000_0000_0000_0000_1000_0000_0000;
+        const WALKING_TIMER = 0b0000_0000_0000_0000_0001_0000_0000_0000;
+        const WALKING = 0b0000_0000_0000_0000_0010_0000_0000_0000;
+        const WALKING_ANIMATION_STATE = 0b0000_0000_0000_0000_0100_0000_0000_0000;
+        const DAMAGE = 0b0000_0000_0000_0000_1000_0000_0000_0000;
+        const IMMOVABLE = 0b0000_0000_0000_0001_0000_0000_0000_0000;
     }
 }
 
@@ -92,6 +93,10 @@ impl Entity {
         Self::DAMAGE
     }
 
+    pub(crate) fn immovable() -> Self {
+        Self::IMMOVABLE
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -154,6 +159,10 @@ impl Entity {
 
     pub(crate) fn has_damage(&self) -> bool {
         self.contains(Self::DAMAGE)
+    }
+
+    pub(crate) fn is_immovable(&self) -> bool {
+        self.contains(Self::IMMOVABLE)
     }
 
     pub(crate) fn remove_walking(&mut self) {

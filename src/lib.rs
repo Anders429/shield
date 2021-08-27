@@ -152,7 +152,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             ) {
                 // TEMPORARY
                 unsafe {
-                    *self.entities.get_unchecked_mut(generational_index.index) |= Entity::bounding_box() | Entity::damage();
+                    *self.entities.get_unchecked_mut(generational_index.index) |= Entity::bounding_box() | Entity::damage() | Entity::immovable();
         
                     *self
                         .components
