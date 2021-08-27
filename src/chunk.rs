@@ -6,5 +6,6 @@ pub(crate) struct Tilemap<'a> {
 }
 
 pub(crate) struct Chunk<'a> {
-    pub(crate) tilemap: Tilemap<'a>,
+    pub(crate) layer_1: Tilemap<'a>,
+    pub(crate) layer_2: Tilemap<'a>,
 }

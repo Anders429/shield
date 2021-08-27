@@ -101,7 +101,32 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
 
         // TEMPORARY
         for (x, y, tile) in data::chunks::CHUNK
-            .tilemap
+            .layer_1
+            .tiles
+            .iter()
+            .enumerate()
+            .map(|(i, row)| {
+                row.iter()
+                    .enumerate()
+                    .filter_map(move |(j, tile)| match tile {
+                        Some(unwrapped_tile) => Some((j, i, unwrapped_tile)),
+                        None => None,
+                    })
+            })
+            .flatten()
+        {
+            self.register_tile(
+                tile,
+                components::Position {
+                    x: x as u16 * 16,
+                    y: y as u16 * 16,
+                },
+                constants::STARTING_CHUNK,
+            );
+        }
+
+        for (x, y, tile) in data::chunks::CHUNK
+            .layer_2
             .tiles
             .iter()
             .enumerate()

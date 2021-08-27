@@ -4,7 +4,43 @@ use crate::{
 };
 
 pub(crate) static CHUNK: Chunk = Chunk {
-    tilemap: Tilemap {
+    layer_1: Tilemap {
         tiles: [[Some(&tiles::GRASS); 32]; 32],
+    },
+    layer_2: Tilemap {
+        tiles: [
+            [None; 32],
+            [Some(&tiles::FENCE); 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+            [None; 32],
+        ],
     },
 };
