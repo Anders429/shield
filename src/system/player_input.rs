@@ -49,7 +49,8 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             }
         }
 
-        if entity.has_facing_direction()
+        if !input.has_r()
+            && entity.has_facing_direction()
             && entity.has_accepts_input()
             && accepts_input.from_player() 
         {

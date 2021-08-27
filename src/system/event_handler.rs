@@ -27,6 +27,9 @@ pub(crate) fn event_handler(event_pump: &mut EventPump) -> Events {
     if keyboard_state.is_scancode_pressed(Scancode::Escape) {
         output_events |= Events::input(Input::START);
     }
+    if keyboard_state.is_scancode_pressed(Scancode::LShift) {
+        output_events |= Events::input(Input::R);
+    }
 
     output_events
 }
