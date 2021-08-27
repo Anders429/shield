@@ -152,9 +152,9 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .palettes
                 .get_unchecked_mut(generational_index.index) = components::sprite::Palette {
-                color_a: data::colors::MEAT,
-                color_b: data::colors::RED,
-                color_c: data::colors::NIGHTBLUE,
+                color_a: data::colors::ORANGE,
+                color_b: data::colors::SKYBLUE,
+                color_c: data::colors::VOID,
             };
             *self
                 .components

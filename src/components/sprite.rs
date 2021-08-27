@@ -75,5 +75,8 @@ impl Sprite {
 }
 
 pub(crate) struct SpriteSheet<'a, const WIDTH: usize, const HEIGHT: usize> {
-    pub(crate) up: [[&'a Sprite; WIDTH]; HEIGHT],
+    pub(crate) up: [[[&'a Sprite; WIDTH]; HEIGHT]; 2],
+    pub(crate) right: [[[&'a Sprite; WIDTH]; HEIGHT]; 2],
+    pub(crate) down: [[[&'a Sprite; WIDTH]; HEIGHT]; 2],
+    pub(crate) left: [[[&'a Sprite; WIDTH]; HEIGHT]; 2],
 }

@@ -58,7 +58,8 @@ where
                 unsafe {
                     *spritesheet_1x1
                         .unwrap()
-                        .up
+                        .down
+                        .get_unchecked(0)
                         .get_unchecked(0)
                         .get_unchecked(0)
                 },
