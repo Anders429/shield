@@ -157,7 +157,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                     *self
                         .components
                         .bounding_boxes
-                        .get_unchecked_mut(generational_index.index) = components::BoundingBox {width: 16, height: 16};
+                        .get_unchecked_mut(generational_index.index) = components::BoundingBox {width: 16, height: 16, offset_x: 0, offset_y: 0};
                         *self
                         .components
                         .damages
@@ -194,7 +194,12 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             *self
                 .components
                 .bounding_boxes
-                .get_unchecked_mut(generational_index.index) = components::BoundingBox::new(16, 16);
+                .get_unchecked_mut(generational_index.index) = components::BoundingBox {
+                    width: 16,
+                    height: 16,
+                    offset_x: 0,
+                    offset_y: 0,
+                };
             *self
                 .components
                 .facing_directions
