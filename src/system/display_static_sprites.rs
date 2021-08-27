@@ -11,7 +11,7 @@ use lru::LruCache;
 use sdl2::{
     pixels::PixelFormatEnum,
     rect::Rect,
-    render::{BlendMode, Canvas, RenderTarget, TextureCreator, Texture},
+    render::{BlendMode, Canvas, RenderTarget, Texture, TextureCreator},
     surface::Surface,
 };
 
@@ -19,7 +19,10 @@ pub(crate) fn display_static_sprites<'a, T, RT, const ENTITY_COUNT: usize>(
     world: &mut World<'a, ENTITY_COUNT>,
     canvas: &mut Canvas<RT>,
     texture_creator: &'a TextureCreator<T>,
-    texture_cache: &mut LruCache<(ByAddress<&'a components::Sprite>, components::Palette), Texture<'a>>,
+    texture_cache: &mut LruCache<
+        (ByAddress<&'a components::Sprite>, components::Palette),
+        Texture<'a>,
+    >,
 ) -> Events
 where
     RT: RenderTarget,

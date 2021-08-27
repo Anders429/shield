@@ -14,6 +14,9 @@ bitflags! {
         const STATIC_SPRITE = 0b0000_0010_0000_0000;
         const HEALTH_POINTS = 0b0000_0100_0000_0000;
         const PLAYER = 0b0000_1000_0000_0000;
+        const WALKING_TIMER = 0b0001_0000_0000_0000;
+        const WALKING = 0b0010_0000_0000_0000;
+        const WALKING_ANIMATION_STATE = 0b0100_0000_0000_0000;
     }
 }
 
@@ -72,6 +75,18 @@ impl Entity {
         Self::PLAYER
     }
 
+    pub(crate) fn walking_timer() -> Self {
+        Self::WALKING_TIMER
+    }
+
+    pub(crate) fn walking() -> Self {
+        Self::WALKING
+    }
+
+    pub(crate) fn walking_animation_state() -> Self {
+        Self::WALKING_ANIMATION_STATE
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -118,5 +133,17 @@ impl Entity {
 
     pub(crate) fn is_player(&self) -> bool {
         self.contains(Self::PLAYER)
+    }
+
+    pub(crate) fn has_walking_timer(&self) -> bool {
+        self.contains(Self::WALKING_TIMER)
+    }
+
+    pub(crate) fn is_walking(&self) -> bool {
+        self.contains(Self::WALKING)
+    }
+
+    pub(crate) fn has_walking_animation_state(&self) -> bool {
+        self.contains(Self::WALKING_ANIMATION_STATE)
     }
 }

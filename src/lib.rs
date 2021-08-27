@@ -40,6 +40,8 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) palettes: Box<[components::Palette; ENTITY_COUNT]>,
     pub(crate) static_sprites: Box<[Option<&'a components::Sprite>; ENTITY_COUNT]>,
     pub(crate) health_points: Box<[components::HealthPoints; ENTITY_COUNT]>,
+    pub(crate) walking_timers: Box<[components::Timer; ENTITY_COUNT]>,
+    pub(crate) walking_animation_states: Box<[components::WalkingAnimationState; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -56,6 +58,10 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             palettes: Box::new([components::Palette::default(); ENTITY_COUNT]),
             static_sprites: Box::new([None; ENTITY_COUNT]),
             health_points: Box::new([components::HealthPoints::default(); ENTITY_COUNT]),
+            walking_timers: Box::new([components::Timer::default(); ENTITY_COUNT]),
+            walking_animation_states: Box::new(
+                [components::WalkingAnimationState::default(); ENTITY_COUNT],
+            ),
         }
     }
 }
@@ -94,11 +100,29 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         self.resources.position = constants::STARTING_POSITION;
 
         // TEMPORARY
-        for (x, y, tile) in data::chunks::CHUNK.tilemap.tiles.iter().enumerate().map(|(i, row)| row.iter().enumerate().filter_map(move |(j, tile)| match tile {
-            Some(unwrapped_tile) => Some((j, i, unwrapped_tile)),
-            None => None,
-        })).flatten() {
-            self.register_tile(tile, components::Position{x: x as u16 * 16, y: y as u16 * 16}, constants::STARTING_CHUNK);
+        for (x, y, tile) in data::chunks::CHUNK
+            .tilemap
+            .tiles
+            .iter()
+            .enumerate()
+            .map(|(i, row)| {
+                row.iter()
+                    .enumerate()
+                    .filter_map(move |(j, tile)| match tile {
+                        Some(unwrapped_tile) => Some((j, i, unwrapped_tile)),
+                        None => None,
+                    })
+            })
+            .flatten()
+        {
+            self.register_tile(
+                tile,
+                components::Position {
+                    x: x as u16 * 16,
+                    y: y as u16 * 16,
+                },
+                constants::STARTING_CHUNK,
+            );
         }
 
         Ok(())
@@ -118,7 +142,10 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::spritesheet_1x1()
                 | Entity::palette()
                 | Entity::health_points()
-                | Entity::player();
+                | Entity::player()
+                | Entity::walking_timer()
+                | Entity::walking() // Temporary
+                | Entity::walking_animation_state();
 
             *self
                 .components
@@ -161,21 +188,48 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .health_points
                 .get_unchecked_mut(generational_index.index) =
                 components::HealthPoints { current: 3, max: 3 };
+            *self
+                .components
+                .walking_timers
+                .get_unchecked_mut(generational_index.index) = 0;
+            *self
+                .components
+                .walking_animation_states
+                .get_unchecked_mut(generational_index.index) =
+                components::WalkingAnimationState::Standing;
         }
 
         Some(generational_index)
     }
 
-    pub(crate) fn register_tile(&mut self, tile: &'a Tile<'a>, position: components::Position, chunk: components::Chunk) -> Option<GenerationalIndex> {
+    pub(crate) fn register_tile(
+        &mut self,
+        tile: &'a Tile<'a>,
+        position: components::Position,
+        chunk: components::Chunk,
+    ) -> Option<GenerationalIndex> {
         let generational_index = self.generational_index_allocator.allocate()?;
 
-        unsafe{
-            *self.entities.get_unchecked_mut(generational_index.index) = Entity::position() | Entity::chunk() | Entity::static_sprite() | Entity::palette();
+        unsafe {
+            *self.entities.get_unchecked_mut(generational_index.index) =
+                Entity::position() | Entity::chunk() | Entity::static_sprite() | Entity::palette();
 
-            *self.components.positions.get_unchecked_mut(generational_index.index) = position;
-            *self.components.chunks.get_unchecked_mut(generational_index.index) = chunk;
-            *self.components.static_sprites.get_unchecked_mut(generational_index.index) = Some(tile.sprite);
-            *self.components.palettes.get_unchecked_mut(generational_index.index) = tile.palette;
+            *self
+                .components
+                .positions
+                .get_unchecked_mut(generational_index.index) = position;
+            *self
+                .components
+                .chunks
+                .get_unchecked_mut(generational_index.index) = chunk;
+            *self
+                .components
+                .static_sprites
+                .get_unchecked_mut(generational_index.index) = Some(tile.sprite);
+            *self
+                .components
+                .palettes
+                .get_unchecked_mut(generational_index.index) = tile.palette;
         }
 
         Some(generational_index)
@@ -186,7 +240,10 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         canvas: &mut Canvas<RT>,
         texture_creator: &'a TextureCreator<T>,
         event_pump: &mut EventPump,
-        texture_cache: &mut LruCache<(ByAddress<&'a components::Sprite>, components::Palette), Texture<'a>>,
+        texture_cache: &mut LruCache<
+            (ByAddress<&'a components::Sprite>, components::Palette),
+            Texture<'a>,
+        >,
     ) -> bool
     where
         RT: RenderTarget,
@@ -198,6 +255,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         if let Some(input) = events.unwrap_input() {
             events |= system::player_input(self, input);
         }
+
+        events |= system::toggle_walking_animation_state(self);
 
         for (entity, movement_delay, speed) in izip!(
             self.entities.iter(),

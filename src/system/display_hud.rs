@@ -4,14 +4,17 @@ use itertools::izip;
 use lru::LruCache;
 use sdl2::{
     rect::Rect,
-    render::{Canvas, RenderTarget, TextureCreator, Texture},
+    render::{Canvas, RenderTarget, Texture, TextureCreator},
 };
 
 pub(crate) fn display_hud<'a, T, RT, const ENTITY_COUNT: usize>(
     world: &mut World<'a, ENTITY_COUNT>,
     canvas: &mut Canvas<RT>,
     texture_creator: &'a TextureCreator<T>,
-    texture_cache: &mut LruCache<(ByAddress<&'a components::Sprite>, components::Palette), Texture<'a>>,
+    texture_cache: &mut LruCache<
+        (ByAddress<&'a components::Sprite>, components::Palette),
+        Texture<'a>,
+    >,
 ) -> Events
 where
     RT: RenderTarget,

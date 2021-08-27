@@ -69,7 +69,7 @@ impl BitOr for Events {
         Self {
             flags: self.flags | rhs.flags,
             input: self.input | rhs.input,
-            screen_chunk_change: self.screen_chunk_change + rhs.screen_chunk_change
+            screen_chunk_change: self.screen_chunk_change + rhs.screen_chunk_change,
         }
     }
 }
@@ -134,7 +134,7 @@ impl Events {
 
     pub(crate) fn unwrap_screen_chunk_change(&self) -> Option<ChunkChange> {
         if self.has_screen_chunk_change() {
-            Some(unsafe {self.unwrap_screen_chunk_change_unchecked()})
+            Some(unsafe { self.unwrap_screen_chunk_change_unchecked() })
         } else {
             None
         }

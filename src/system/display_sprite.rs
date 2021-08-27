@@ -4,7 +4,7 @@ use lru::LruCache;
 use sdl2::{
     pixels::PixelFormatEnum,
     rect::Rect,
-    render::{BlendMode, Canvas, RenderTarget, TextureCreator, Texture},
+    render::{BlendMode, Canvas, RenderTarget, Texture, TextureCreator},
     surface::Surface,
 };
 
@@ -15,7 +15,10 @@ pub(crate) fn display_sprite<'a, T, RT>(
     y: i32,
     canvas: &mut Canvas<RT>,
     texture_creator: &'a TextureCreator<T>,
-    texture_cache: &mut LruCache<(ByAddress<&'a components::Sprite>, components::Palette), Texture<'a>>,
+    texture_cache: &mut LruCache<
+        (ByAddress<&'a components::Sprite>, components::Palette),
+        Texture<'a>,
+    >,
 ) -> Events
 where
     RT: RenderTarget,
@@ -47,7 +50,7 @@ where
             &texture_cache.get(&(ByAddress(sprite), palette)).unwrap()
         }
     };
-    
+
     match canvas.copy(
         &texture,
         None,

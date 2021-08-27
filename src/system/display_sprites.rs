@@ -11,7 +11,7 @@ use lru::LruCache;
 use sdl2::{
     pixels::PixelFormatEnum,
     rect::Rect,
-    render::{BlendMode, Canvas, RenderTarget, TextureCreator, Texture},
+    render::{BlendMode, Canvas, RenderTarget, Texture, TextureCreator},
     surface::Surface,
 };
 
@@ -19,19 +19,23 @@ pub(crate) fn display_sprites<'a, T, RT, const ENTITY_COUNT: usize>(
     world: &mut World<'a, ENTITY_COUNT>,
     canvas: &mut Canvas<RT>,
     texture_creator: &'a TextureCreator<T>,
-    texture_cache: &mut LruCache<(ByAddress<&'a components::Sprite>, components::Palette), Texture<'a>>,
+    texture_cache: &mut LruCache<
+        (ByAddress<&'a components::Sprite>, components::Palette),
+        Texture<'a>,
+    >,
 ) -> Events
 where
     RT: RenderTarget,
 {
     let mut events = Events::default();
 
-    for (entity, position, chunk, spritesheet_1x1, palette) in izip!(
+    for (entity, position, chunk, spritesheet_1x1, palette, walking_animation_state) in izip!(
         world.entities.iter(),
         world.components.positions.iter(),
         world.components.chunks.iter(),
         world.components.spritesheets_1x1.iter(),
         world.components.palettes.iter(),
+        world.components.walking_animation_states.iter(),
     ) {
         if entity.has_position()
             && entity.has_chunk()
@@ -61,7 +65,7 @@ where
                         .down
                         .get_unchecked(0)
                         .get_unchecked(0)
-                        .get_unchecked(0)
+                        .get_unchecked(*walking_animation_state as usize)
                 },
                 *palette,
                 x as i32,

@@ -97,7 +97,10 @@ fn scroll_screen(
     }
     let x_chunk_change = screen_chunk.x as i8 - prev_x_chunk as i8;
     if x_chunk_change != 0 {
-        events |= Events::screen_chunk_change(ChunkChange {x: x_chunk_change, y:0});
+        events |= Events::screen_chunk_change(ChunkChange {
+            x: x_chunk_change,
+            y: 0,
+        });
     }
 
     // Move y
@@ -122,7 +125,10 @@ fn scroll_screen(
     }
     let y_chunk_change = screen_chunk.y as i8 - prev_y_chunk as i8;
     if y_chunk_change != 0 {
-        events |= Events::screen_chunk_change(ChunkChange {x:0, y:y_chunk_change});
+        events |= Events::screen_chunk_change(ChunkChange {
+            x: 0,
+            y: y_chunk_change,
+        });
     }
 
     events

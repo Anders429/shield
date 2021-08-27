@@ -37,7 +37,12 @@ pub fn main() -> anyhow::Result<()> {
         canvas.set_draw_color(data::colors::VOID.to_tuple());
         canvas.clear();
 
-        if !world.tick(&mut canvas, &texture_creator, &mut event_pump, &mut texture_cache) {
+        if !world.tick(
+            &mut canvas,
+            &texture_creator,
+            &mut event_pump,
+            &mut texture_cache,
+        ) {
             break;
         }
 
