@@ -1,5 +1,6 @@
 use crate::{
     components, constants,
+    entity::Entity,
     events::{ChunkChange, Events, Input},
     system::{find_pixel_difference, movement, rotate},
     World,
@@ -12,13 +13,24 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
 ) -> Events {
     let mut events = Events::default();
 
-    for (entity, position, chunk, accepts_input, speed, facing_direction) in izip!(
-        world.entities.iter(),
+    for (
+        entity,
+        position,
+        chunk,
+        accepts_input,
+        speed,
+        facing_direction,
+        walking_timer,
+        walking_animation_state,
+    ) in izip!(
+        world.entities.iter_mut(),
         world.components.positions.iter_mut(),
         world.components.chunks.iter_mut(),
         world.components.accepts_input.iter(),
         world.components.speeds.iter(),
         world.components.facing_directions.iter_mut(),
+        world.components.walking_timers.iter_mut(),
+        world.components.walking_animation_states.iter_mut(),
     ) {
         if entity.has_position()
             && entity.has_chunk()
@@ -28,15 +40,19 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
         {
             if input.has_up() {
                 events |= movement(position, chunk, components::Direction::Up, *speed);
+                *entity |= Entity::walking();
             }
             if input.has_right() {
                 events |= movement(position, chunk, components::Direction::Right, *speed);
+                *entity |= Entity::walking();
             }
             if input.has_down() {
                 events |= movement(position, chunk, components::Direction::Down, *speed);
+                *entity |= Entity::walking();
             }
             if input.has_left() {
                 events |= movement(position, chunk, components::Direction::Left, *speed);
+                *entity |= Entity::walking();
             }
 
             if entity.is_player() {
@@ -49,25 +65,31 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             }
         }
 
+        if entity.is_walking()
+            && entity.has_walking_timer()
+            && entity.has_walking_animation_state()
+            && input
+                .intersection(Input::UP | Input::RIGHT | Input::DOWN | Input::LEFT)
+                .is_empty()
+            && entity.has_accepts_input()
+            && accepts_input.from_player()
+        {
+            entity.remove_walking();
+            *walking_timer = 0;
+            *walking_animation_state = components::WalkingAnimationState::StandingA;
+        }
+
         if !input.has_r()
             && entity.has_facing_direction()
             && entity.has_accepts_input()
-            && accepts_input.from_player() 
+            && accepts_input.from_player()
         {
             // Already facing that direction?
             let rotation_needed = !match facing_direction {
-                components::Direction::Up => {
-                    input.has_up()
-                }
-                components::Direction::Right => {
-                    input.has_right()
-                }
-                components::Direction::Down => {
-                    input.has_down()
-                }
-                components::Direction::Left => {
-                    input.has_left()
-                }
+                components::Direction::Up => input.has_up(),
+                components::Direction::Right => input.has_right(),
+                components::Direction::Down => input.has_down(),
+                components::Direction::Left => input.has_left(),
             };
             if rotation_needed {
                 if input.has_up() {
@@ -80,7 +102,6 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                     events |= rotate(facing_direction, components::Direction::Left);
                 }
             }
-            
         }
     }
 

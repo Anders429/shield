@@ -146,4 +146,8 @@ impl Entity {
     pub(crate) fn has_walking_animation_state(&self) -> bool {
         self.contains(Self::WALKING_ANIMATION_STATE)
     }
+
+    pub(crate) fn remove_walking(&mut self) {
+        self.remove(Self::WALKING)
+    }
 }

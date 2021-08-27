@@ -11,7 +11,7 @@ mod tile;
 
 use by_address::ByAddress;
 use entity::Entity;
-use events::Events;
+use events::{Events, Input};
 use generational_index::GenerationalIndex;
 use itertools::izip;
 use lru::LruCache;
@@ -144,7 +144,6 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::health_points()
                 | Entity::player()
                 | Entity::walking_timer()
-                | Entity::walking() // Temporary
                 | Entity::walking_animation_state();
 
             *self
@@ -252,9 +251,10 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
 
         events |= system::event_handler(event_pump);
 
-        if let Some(input) = events.unwrap_input() {
-            events |= system::player_input(self, input);
-        }
+        // if let Some(input) = events.unwrap_input() {
+        //     events |= system::player_input(self, input);
+        // }
+        events |= system::player_input(self, events.unwrap_input().unwrap_or(Input::default()));
 
         events |= system::toggle_walking_animation_state(self);
 
