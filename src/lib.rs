@@ -196,7 +196,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .walking_animation_states
                 .get_unchecked_mut(generational_index.index) =
-                components::WalkingAnimationState::Standing;
+                components::WalkingAnimationState::StandingA;
         }
 
         Some(generational_index)

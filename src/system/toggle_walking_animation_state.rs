@@ -6,8 +6,10 @@ pub(crate) fn toggle_walking_animation_state<const ENTITY_COUNT: usize>(world: &
         if entity.has_walking_timer() && entity.has_walking_animation_state() {
             if *walking_timer == 0 {
                 *walking_animation_state = match walking_animation_state {
-                    components::WalkingAnimationState::Standing => components::WalkingAnimationState::Step,
-                    components::WalkingAnimationState::Step => components::WalkingAnimationState::Standing,
+                    components::WalkingAnimationState::StandingA => components::WalkingAnimationState::StepA,
+                    components::WalkingAnimationState::StepA => components::WalkingAnimationState::StandingB,
+                    components::WalkingAnimationState::StandingB => components::WalkingAnimationState::StepB,
+                    components::WalkingAnimationState::StepB => components::WalkingAnimationState::StandingA,
                 };
                 *walking_timer = 20;
             } else {

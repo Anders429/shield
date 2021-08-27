@@ -65,7 +65,7 @@ where
                         .down
                         .get_unchecked(0)
                         .get_unchecked(0)
-                        .get_unchecked(*walking_animation_state as usize)
+                        .get_unchecked(walking_animation_state.to_index())
                 },
                 *palette,
                 x as i32,
