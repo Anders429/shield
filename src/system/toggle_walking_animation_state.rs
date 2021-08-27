@@ -26,7 +26,7 @@ pub(crate) fn toggle_walking_animation_state<const ENTITY_COUNT: usize>(
                         components::WalkingAnimationState::StandingA
                     }
                 };
-                *walking_timer = 20;
+                *walking_timer = 10;
             } else {
                 *walking_timer -= 1;
             }

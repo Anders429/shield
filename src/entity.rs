@@ -17,6 +17,7 @@ bitflags! {
         const WALKING_TIMER = 0b0001_0000_0000_0000;
         const WALKING = 0b0010_0000_0000_0000;
         const WALKING_ANIMATION_STATE = 0b0100_0000_0000_0000;
+        const DAMAGE = 0b1000_0000_0000_0000;
     }
 }
 
@@ -87,6 +88,10 @@ impl Entity {
         Self::WALKING_ANIMATION_STATE
     }
 
+    pub(crate) fn damage() -> Self {
+        Self::DAMAGE
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -145,6 +150,10 @@ impl Entity {
 
     pub(crate) fn has_walking_animation_state(&self) -> bool {
         self.contains(Self::WALKING_ANIMATION_STATE)
+    }
+
+    pub(crate) fn has_damage(&self) -> bool {
+        self.contains(Self::DAMAGE)
     }
 
     pub(crate) fn remove_walking(&mut self) {

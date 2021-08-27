@@ -42,6 +42,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) health_points: Box<[components::HealthPoints; ENTITY_COUNT]>,
     pub(crate) walking_timers: Box<[components::Timer; ENTITY_COUNT]>,
     pub(crate) walking_animation_states: Box<[components::WalkingAnimationState; ENTITY_COUNT]>,
+    pub(crate) damages: Box<[components::Damage; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -62,6 +63,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             walking_animation_states: Box::new(
                 [components::WalkingAnimationState::default(); ENTITY_COUNT],
             ),
+            damages: Box::new([components::Damage::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -140,14 +142,28 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             })
             .flatten()
         {
-            self.register_tile(
+            if let Some(generational_index) = self.register_tile(
                 tile,
                 components::Position {
                     x: x as u16 * 16,
                     y: y as u16 * 16,
                 },
                 constants::STARTING_CHUNK,
-            );
+            ) {
+                // TEMPORARY
+                unsafe {
+                    *self.entities.get_unchecked_mut(generational_index.index) |= Entity::bounding_box() | Entity::damage();
+        
+                    *self
+                        .components
+                        .bounding_boxes
+                        .get_unchecked_mut(generational_index.index) = components::BoundingBox {width: 16, height: 16};
+                        *self
+                        .components
+                        .damages
+                        .get_unchecked_mut(generational_index.index) = 1;
+                }
+            }
         }
 
         Ok(())
