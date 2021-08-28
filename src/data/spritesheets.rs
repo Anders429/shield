@@ -25,9 +25,9 @@ pub(crate) static PLAYER: SpriteSheet<1, 1> = SpriteSheet {
 
 pub(crate) static SHIELD: SpriteSheet<1, 1> = SpriteSheet {
     up: [
-        [[&super::sprites::SHIELD_DOWN]],
-        [[&super::sprites::SHIELD_DOWN]],
-        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_UP]],
+        [[&super::sprites::SHIELD_UP]],
+        [[&super::sprites::SHIELD_UP]],
     ],
     right: [
         [[&super::sprites::SHIELD_DOWN]],

@@ -30,7 +30,7 @@ where
     let mut events = Events::default();
 
     for index in display_sort(world, |(index, entity)| {
-        if entity.has_spritesheet_1x1() && entity.has_palette() {
+        if entity.has_spritesheet_1x1() && entity.has_palette() && entity.has_facing_direction() {
             Some(index)
         } else {
             None
@@ -41,6 +41,7 @@ where
         let chunk = unsafe { world.components.chunks.get_unchecked(index) };
         let spritesheet_1x1 = unsafe { world.components.spritesheets_1x1.get_unchecked(index) };
         let palette = unsafe { world.components.palettes.get_unchecked(index) };
+        let facing_direction = unsafe { world.components.facing_directions.get_unchecked(index) };
         let walking_animation_state = if entity.has_walking_animation_state() {
             *unsafe {
                 world
@@ -70,12 +71,15 @@ where
         // Just draw up for now.
         events |= system::display_sprite(
             unsafe {
-                *spritesheet_1x1
-                    .unwrap()
-                    .down
-                    .get_unchecked(0)
-                    .get_unchecked(0)
-                    .get_unchecked(walking_animation_state.to_index())
+                *match facing_direction {
+                    components::Direction::Up => spritesheet_1x1.unwrap().up,
+                    components::Direction::Right => spritesheet_1x1.unwrap().right,
+                    components::Direction::Down => spritesheet_1x1.unwrap().down,
+                    components::Direction::Left => spritesheet_1x1.unwrap().left,
+                }
+                .get_unchecked(0)
+                .get_unchecked(0)
+                .get_unchecked(walking_animation_state.to_index())
             },
             *palette,
             x as i32,
