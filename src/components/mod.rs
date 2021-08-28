@@ -12,6 +12,7 @@ mod movement_delay;
 mod position;
 mod speed;
 mod timer;
+mod usable;
 mod walking_animation_state;
 
 pub(crate) use accepts_input::AcceptsInput;
@@ -27,4 +28,5 @@ pub(crate) use position::Position;
 pub(crate) use speed::Speed;
 pub(crate) use sprite::{Palette, Sprite, SpriteSheet};
 pub(crate) use timer::Timer;
+pub(crate) use usable::Usable;
 pub(crate) use walking_animation_state::WalkingAnimationState;

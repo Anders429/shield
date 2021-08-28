@@ -348,12 +348,27 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
 
         if input.has_a() && entity.has_accepts_input() && accepts_input.from_player() {
             if entity.has_holding() {
-                // TODO: use the item.
+                // Use held entity.
+                deferred_executions.push(Box::new(enclose!((holding, index, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
+                    let mut events = Events::default();
+
+                    let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                    if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
+                        *held_entity |= Entity::damage();
+                        *unsafe {world.components.damages.get_unchecked_mut(holding.index)} = 1;
+                        events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, facing_direction, 1);
+                    } else {
+                        unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                    }
+
+                    events
+                })));
             } else if entity.has_facing_direction()
                 && entity.has_position()
                 && entity.has_chunk()
                 && entity.has_generation()
             {
+                // Pick up holdable entity.
                 deferred_executions.push(Box::new(enclose!((index, generation, mut position, mut chunk, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
                     let mut events = Events::default();
 
@@ -407,7 +422,11 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             }
         }
 
-        if input.has_b() && entity.has_holding() && entity.has_accepts_input() && accepts_input.from_player() {
+        if input.has_b()
+            && entity.has_holding()
+            && entity.has_accepts_input()
+            && accepts_input.from_player()
+        {
             entity.remove_holding();
             deferred_executions.push(Box::new(enclose!((holding) move |world: &mut World<ENTITY_COUNT>| {
                 if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} {

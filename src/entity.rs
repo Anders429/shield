@@ -26,6 +26,7 @@ bitflags! {
         const HELD = 0b0000_0000_0010_0000_0000_0000_0000_0000;
         const GRAB = 0b0000_0000_0100_0000_0000_0000_0000_0000;
         const HOLDABLE = 0b0000_0000_1000_0000_0000_0000_0000_0000;
+        const USABLE = 0b0000_0001_0000_0000_0000_0000_0000_0000;
     }
 }
 
@@ -132,6 +133,10 @@ impl Entity {
         Self::HOLDABLE
     }
 
+    pub(crate) fn usable() -> Self {
+        Self::USABLE
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -228,13 +233,17 @@ impl Entity {
         self.contains(Self::HOLDABLE)
     }
 
+    pub(crate) fn has_usable(&self) -> bool {
+        self.contains(Self::USABLE)
+    }
+
     pub(crate) fn remove_walking(&mut self) {
         self.remove(Self::WALKING)
     }
 
-    // pub(crate) fn remove_moving_direction(&mut self) {
-    //     self.remove(Self::MOVING_DIRECTION)
-    // }
+    pub(crate) fn remove_damage(&mut self) {
+        self.remove(Self::DAMAGE)
+    }
 
     pub(crate) fn remove_damage_invulnerability_timer(&mut self) {
         self.remove(Self::DAMAGE_INVULNERABILITY_TIMER)

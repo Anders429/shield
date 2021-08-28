@@ -11,6 +11,7 @@ mod event_handler;
 mod find_pixel_difference;
 mod movement;
 mod player_input;
+mod reset_shield_use;
 mod rotate;
 mod toggle_walking_animation_state;
 
@@ -27,5 +28,6 @@ pub(crate) use event_handler::event_handler;
 pub(crate) use find_pixel_difference::find_pixel_difference;
 pub(crate) use movement::movement;
 pub(crate) use player_input::player_input;
+pub(crate) use reset_shield_use::reset_shield_use;
 pub(crate) use rotate::rotate;
 pub(crate) use toggle_walking_animation_state::toggle_walking_animation_state;

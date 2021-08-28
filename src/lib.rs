@@ -51,6 +51,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) generations: Box<[components::Generation; ENTITY_COUNT]>,
     pub(crate) helds: Box<[components::EntityReference; ENTITY_COUNT]>,
     pub(crate) grabs: Box<[components::EntityReference; ENTITY_COUNT]>,
+    pub(crate) usables: Box<[components::Usable; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -78,6 +79,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             generations: Box::new([components::Generation::default(); ENTITY_COUNT]),
             helds: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
             grabs: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
+            usables: Box::new([components::Usable::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -287,7 +289,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::spritesheet_1x1()
                 | Entity::palette()
                 | Entity::generation()
-                | Entity::holdable();
+                | Entity::holdable()
+                | Entity::usable();
 
             *self
                 .components
@@ -326,6 +329,10 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .generations
                 .get_unchecked_mut(generational_index.index) = generational_index.generation;
+            *self
+                .components
+                .usables
+                .get_unchecked_mut(generational_index.index) = components::Usable::Shield;
         }
 
         Some(generational_index)
@@ -419,6 +426,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         RT: RenderTarget,
     {
         let mut events = Events::default();
+
+        events |= system::reset_shield_use(self);
 
         events |= system::event_handler(event_pump);
         events |= system::player_input(self, events.unwrap_input().unwrap_or(Input::default()));

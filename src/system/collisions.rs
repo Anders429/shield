@@ -563,7 +563,7 @@ fn collision_damage<const ENTITY_COUNT: usize>(
                     .generational_index_allocator
                     .is_allocated_unchecked(*holding)
             } {
-                if holding.index == index_b {
+                if holding.index == index_a {
                     return Events::default();
                 }
             } else {
