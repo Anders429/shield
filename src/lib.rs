@@ -128,9 +128,29 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         }
         self.resources.chunk = constants::STARTING_CHUNK;
         self.resources.position = constants::STARTING_POSITION;
+        
+        self.register_chunk(&data::chunks::CHUNK_0_0, components::Chunk {
+            x: 0,
+            y: 0,
+        });
+        self.register_chunk(&data::chunks::CHUNK_1_0, components::Chunk {
+            x: 1,
+            y: 0,
+        });
+        self.register_chunk(&data::chunks::CHUNK_0_1, components::Chunk {
+            x: 0,
+            y: 1,
+        });
+        self.register_chunk(&data::chunks::CHUNK_1_1, components::Chunk {
+            x: 1,
+            y: 1,
+        });
 
-        // TEMPORARY
-        for (x, y, tile) in data::chunks::CHUNK
+        Ok(())
+    }
+
+    fn register_chunk(&mut self, chunk: &chunk::Chunk<'a>, chunk_coords: components::Chunk) {
+        for (x, y, tile) in chunk
             .layer_1
             .tiles
             .iter()
@@ -151,11 +171,11 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                     x: x as u16 * 16,
                     y: y as u16 * 16,
                 },
-                constants::STARTING_CHUNK,
+                chunk_coords,
             );
         }
 
-        for (x, y, tile) in data::chunks::CHUNK
+        for (x, y, tile) in chunk
             .layer_2
             .tiles
             .iter()
@@ -176,7 +196,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                     x: x as u16 * 16,
                     y: y as u16 * 16,
                 },
-                constants::STARTING_CHUNK,
+                chunk_coords,
             ) {
                 // TEMPORARY
                 unsafe {
@@ -195,8 +215,6 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 }
             }
         }
-
-        Ok(())
     }
 
     fn register_player(&mut self) -> Option<GenerationalIndex> {
@@ -305,7 +323,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             *self
                 .components
                 .positions
-                .get_unchecked_mut(generational_index.index) = constants::STARTING_POSITION;
+                .get_unchecked_mut(generational_index.index) = constants::SHIELD_STARTING_POSITION;
             *self
                 .components
                 .bounding_boxes
@@ -322,7 +340,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             *self
                 .components
                 .chunks
-                .get_unchecked_mut(generational_index.index) = constants::STARTING_CHUNK;
+                .get_unchecked_mut(generational_index.index) = constants::SHIELD_STARTING_CHUNK;
             *self
                 .components
                 .spritesheets_1x1

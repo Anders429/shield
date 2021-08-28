@@ -52,8 +52,8 @@ pub(crate) static FENCE_CORNER_TOP_RIGHT: Tile = Tile {
 pub(crate) static BUSH: Tile = Tile {
     sprite: &sprites::BUSH,
     palette: Palette {
-        color_a: colors::BROWN,
+        color_a: colors::GREEN,
         color_b: colors::DARKBROWN,
-        color_c: colors::NIGHTBLUE,
+        color_c: colors::DARKGREEN,
     },
 };
