@@ -446,6 +446,11 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 Events::default()
             })));
         }
+
+        if input.has_start() && world.resources.pause_delay == 0 {
+            world.resources.game_state = components::GameState::Pause;
+            world.resources.pause_delay = 20;
+        }
     }
 
     for mut deferred_execution in deferred_executions {

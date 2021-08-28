@@ -29,6 +29,7 @@ struct Resources {
     chunk: components::Chunk,
     position: components::Position,
     game_state: components::GameState,
+    pause_delay: components::Timer,
 }
 
 struct Components<'a, const ENTITY_COUNT: usize> {
@@ -523,6 +524,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
 
         events |= system::event_handler(event_pump);
 
+        events |= system::decrement_pause_delay(self);
+
         if matches!(self.resources.game_state, components::GameState::Playing) {
             events |= system::reset_shield_use(self);
 
@@ -552,6 +555,9 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         if matches!(self.resources.game_state, components::GameState::GameOver) {
             events |= system::remove_all_but_player(self);
             events |= system::restart(self, events.unwrap_input().unwrap_or(Input::default()));
+        }
+        if matches!(self.resources.game_state, components::GameState::Pause) {
+            events |= system::unpause(self, events.unwrap_input().unwrap_or(Input::default()));
         }
 
         events |= system::display_static_sprites(self, canvas, texture_creator, texture_cache);
