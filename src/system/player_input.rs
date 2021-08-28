@@ -382,6 +382,16 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 })));
             }
         }
+
+        if input.has_b() && entity.has_holding() && entity.has_accepts_input() && accepts_input.from_player() {
+            entity.remove_holding();
+            deferred_executions.push(Box::new(enclose!((holding) move |world: &mut World<ENTITY_COUNT>| {
+                if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} {
+                    unsafe {world.entities.get_unchecked_mut(holding.index)}.remove_held();
+                }
+                Events::default()
+            })));
+        }
     }
 
     for mut deferred_execution in deferred_executions {

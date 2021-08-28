@@ -33,6 +33,9 @@ pub(crate) fn event_handler(event_pump: &mut EventPump) -> Events {
     if keyboard_state.is_scancode_pressed(Scancode::X) {
         output_events |= Events::input(Input::A);
     }
+    if keyboard_state.is_scancode_pressed(Scancode::Z) {
+        output_events |= Events::input(Input::B);
+    }
 
     output_events
 }
