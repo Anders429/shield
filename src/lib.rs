@@ -47,6 +47,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) damages: Box<[components::Damage; ENTITY_COUNT]>,
     pub(crate) moving_directions: Box<[components::Direction; ENTITY_COUNT]>,
     pub(crate) damage_invulnerability_timers: Box<[components::Timer; ENTITY_COUNT]>,
+    pub(crate) holdings: Box<[components::EntityReference; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -70,6 +71,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             damages: Box::new([components::Damage::default(); ENTITY_COUNT]),
             moving_directions: Box::new([components::Direction::default(); ENTITY_COUNT]),
             damage_invulnerability_timers: Box::new([components::Timer::default(); ENTITY_COUNT]),
+            holdings: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
         }
     }
 }
