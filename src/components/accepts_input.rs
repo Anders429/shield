@@ -2,6 +2,7 @@
 pub(crate) enum AcceptsInput {
     None,
     Player,
+    FollowsPlayer,
 }
 
 impl Default for AcceptsInput {
@@ -13,5 +14,9 @@ impl Default for AcceptsInput {
 impl AcceptsInput {
     pub(crate) fn from_player(&self) -> bool {
         matches!(self, AcceptsInput::Player)
+    }
+
+    pub(crate) fn follows_player(&self) -> bool {
+        matches!(self, AcceptsInput::FollowsPlayer)
     }
 }

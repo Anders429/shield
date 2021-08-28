@@ -119,6 +119,9 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         if let None = self.register_shield() {
             return Err(anyhow::format_err!("Unable to register shield."));
         }
+        if let None = self.register_slime(constants::STARTING_POSITION, constants::STARTING_CHUNK) {
+            return Err(anyhow::format_err!("Unable to register slime."));
+        }
         self.resources.chunk = constants::STARTING_CHUNK;
         self.resources.position = constants::STARTING_POSITION;
 
@@ -335,6 +338,83 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .usables
                 .get_unchecked_mut(generational_index.index) = components::Usable::Shield;
+        }
+
+        Some(generational_index)
+    }
+
+    pub(crate) fn register_slime(
+        &mut self,
+        position: components::Position,
+        chunk: components::Chunk,
+    ) -> Option<GenerationalIndex> {
+        let generational_index = self.generational_index_allocator.allocate()?;
+
+        unsafe {
+            *self.entities.get_unchecked_mut(generational_index.index) = Entity::position()
+                | Entity::chunk()
+                | Entity::spritesheet_1x1()
+                | Entity::palette()
+                | Entity::facing_direction()
+                | Entity::health_points()
+                | Entity::bounding_box()
+                | Entity::damage()
+                | Entity::generation()
+                | Entity::facing_direction()
+                | Entity::accepts_input()
+                | Entity::moving_direction();
+
+            *self
+                .components
+                .positions
+                .get_unchecked_mut(generational_index.index) = position;
+            *self
+                .components
+                .chunks
+                .get_unchecked_mut(generational_index.index) = chunk;
+            *self
+                .components
+                .spritesheets_1x1
+                .get_unchecked_mut(generational_index.index) = Some(&data::spritesheets::SLIME);
+            *self
+                .components
+                .palettes
+                .get_unchecked_mut(generational_index.index) = components::sprite::Palette {
+                color_a: data::colors::MEAT,
+                color_b: data::colors::RED,
+                color_c: data::colors::VOID,
+            };
+            *self
+                .components
+                .facing_directions
+                .get_unchecked_mut(generational_index.index) = components::Direction::Down;
+            *self
+                .components
+                .health_points
+                .get_unchecked_mut(generational_index.index) = components::HealthPoints {
+                    current: 2,
+                    max: 2,
+                };
+            *self
+                .components
+                .bounding_boxes
+                .get_unchecked_mut(generational_index.index) = components::BoundingBox {
+                width: 16,
+                height: 16,
+                offset_x: 0,
+                offset_y: 0,
+            };
+            *self
+                .components
+                .damages
+                .get_unchecked_mut(generational_index.index) = 1;
+            *self
+                .components
+                .generations
+                .get_unchecked_mut(generational_index.index) = generational_index.generation;
+            *self.components.facing_directions.get_unchecked_mut(generational_index.index) = components::Direction::Down;
+            *self.components.accepts_input.get_unchecked_mut(generational_index.index) = components::AcceptsInput::FollowsPlayer;
+            *self.components.moving_directions.get_unchecked_mut(generational_index.index) = components::Direction::Down;
         }
 
         Some(generational_index)
