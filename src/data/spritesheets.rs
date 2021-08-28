@@ -30,9 +30,9 @@ pub(crate) static SHIELD: SpriteSheet<1, 1> = SpriteSheet {
         [[&super::sprites::SHIELD_UP]],
     ],
     right: [
-        [[&super::sprites::SHIELD_DOWN]],
-        [[&super::sprites::SHIELD_DOWN]],
-        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_RIGHT]],
+        [[&super::sprites::SHIELD_RIGHT]],
+        [[&super::sprites::SHIELD_RIGHT]],
     ],
     down: [
         [[&super::sprites::SHIELD_DOWN]],
@@ -40,8 +40,8 @@ pub(crate) static SHIELD: SpriteSheet<1, 1> = SpriteSheet {
         [[&super::sprites::SHIELD_DOWN]],
     ],
     left: [
-        [[&super::sprites::SHIELD_DOWN]],
-        [[&super::sprites::SHIELD_DOWN]],
-        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_LEFT]],
+        [[&super::sprites::SHIELD_LEFT]],
+        [[&super::sprites::SHIELD_LEFT]],
     ],
 };
