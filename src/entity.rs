@@ -24,6 +24,8 @@ bitflags! {
         const HOLDING = 0b0000_0000_0000_1000_0000_0000_0000_0000;
         const GENERATION = 0b0000_0000_0001_0000_0000_0000_0000_0000;
         const HELD = 0b0000_0000_0010_0000_0000_0000_0000_0000;
+        const GRAB = 0b0000_0000_0100_0000_0000_0000_0000_0000;
+        const HOLDABLE = 0b0000_0000_1000_0000_0000_0000_0000_0000;
     }
 }
 
@@ -122,6 +124,14 @@ impl Entity {
         Self::HELD
     }
 
+    pub(crate) fn grab() -> Self {
+        Self::GRAB
+    }
+
+    pub(crate) fn holdable() -> Self {
+        Self::HOLDABLE
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -208,6 +218,14 @@ impl Entity {
 
     pub(crate) fn has_held(&self) -> bool {
         self.contains(Self::HELD)
+    }
+
+    pub(crate) fn has_grab(&self) -> bool {
+        self.contains(Self::GRAB)
+    }
+
+    pub(crate) fn has_holdable(&self) -> bool {
+        self.contains(Self::HOLDABLE)
     }
 
     pub(crate) fn remove_walking(&mut self) {

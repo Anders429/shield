@@ -204,13 +204,22 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             let rotation_needed = !match facing_direction {
                 components::Direction::Up => input.has_up(),
                 components::Direction::Right => input.has_right() && !input.has_up(),
-                components::Direction::Down => input.has_down() && !input.has_up() && !input.has_right(),
-                components::Direction::Left => input.has_left() && !input.has_up() && !input.has_right() && !input.has_down(),
+                components::Direction::Down => {
+                    input.has_down() && !input.has_up() && !input.has_right()
+                }
+                components::Direction::Left => {
+                    input.has_left() && !input.has_up() && !input.has_right() && !input.has_down()
+                }
             };
             if rotation_needed {
                 if input.has_up() {
                     events |= rotate(facing_direction, components::Direction::Up);
-                    if entity.has_holding() {
+                    if entity.has_holding()
+                        && entity.has_bounding_box()
+                        && entity.has_position()
+                        && entity.has_chunk()
+                        && entity.has_generation()
+                    {
                         deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
@@ -233,7 +242,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                     }
                 } else if input.has_right() {
                     events |= rotate(facing_direction, components::Direction::Right);
-                    if entity.has_holding() {
+                    if entity.has_holding()
+                        && entity.has_bounding_box()
+                        && entity.has_position()
+                        && entity.has_chunk()
+                        && entity.has_generation()
+                    {
                         deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
@@ -256,7 +270,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                     }
                 } else if input.has_down() {
                     events |= rotate(facing_direction, components::Direction::Down);
-                    if entity.has_holding() {
+                    if entity.has_holding()
+                        && entity.has_bounding_box()
+                        && entity.has_position()
+                        && entity.has_chunk()
+                        && entity.has_generation()
+                    {
                         deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
@@ -279,7 +298,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                     }
                 } else if input.has_left() {
                     events |= rotate(facing_direction, components::Direction::Left);
-                    if entity.has_holding() {
+                    if entity.has_holding()
+                        && entity.has_bounding_box()
+                        && entity.has_position()
+                        && entity.has_chunk()
+                        && entity.has_generation()
+                    {
                         deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
@@ -301,6 +325,70 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                         })));
                     }
                 }
+            }
+        }
+
+        if input.has_a()
+            && entity.has_accepts_input() 
+            && accepts_input.from_player()
+        {
+            if entity.has_holding() {
+                // TODO: use the item.
+            } else if entity.has_facing_direction()
+                && entity.has_position()
+                && entity.has_chunk()
+                && entity.has_generation()
+            {
+                deferred_executions.push(Box::new(enclose!((index, generation, mut position, mut chunk, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
+                    let mut events = Events::default();
+
+                    let mut grab_position = position.clone();
+                    let mut grab_chunk = chunk.clone();
+                    let grabber = components::EntityReference {
+                        index,
+                        generation,
+                    };
+                    match facing_direction {
+                        components::Direction::Up => {
+                            events |= movement(&mut grab_position, &mut grab_chunk, components::Direction::Up, 8);
+                            world.register_grab(grab_position, grab_chunk, components::BoundingBox {
+                                width: 16,
+                                height: 8,
+                                offset_x: 0,
+                                offset_y: 0,
+                            }, grabber);
+                        }
+                        components::Direction::Right => {
+                            events |= movement(&mut grab_position, &mut grab_chunk, components::Direction::Right, 16);
+                            world.register_grab(grab_position, grab_chunk, components::BoundingBox {
+                                width: 8,
+                                height: 16,
+                                offset_x: 0,
+                                offset_y: 0,
+                            }, grabber);
+                        }
+                        components::Direction::Down => {
+                            events |= movement(&mut grab_position, &mut grab_chunk, components::Direction::Down, 16);
+                            world.register_grab(grab_position, grab_chunk, components::BoundingBox {
+                                width: 16,
+                                height: 8,
+                                offset_x: 0,
+                                offset_y: 0,
+                            }, grabber);
+                        }
+                        components::Direction::Left => {
+                            events |= movement(&mut grab_position, &mut grab_chunk, components::Direction::Left, 8);
+                            world.register_grab(grab_position, grab_chunk, components::BoundingBox {
+                                width: 8,
+                                height: 16,
+                                offset_x: 0,
+                                offset_y: 0,
+                            }, grabber);
+                        }
+                    }
+                    
+                    events
+                })));
             }
         }
     }

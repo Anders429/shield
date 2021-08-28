@@ -98,6 +98,8 @@ pub(crate) fn collisions<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COU
         events |= collision_held_immovable(world, *index_b, *index_a);
         events |= collision_damage(world, *index_a, *index_b);
         events |= collision_damage(world, *index_b, *index_a);
+        events |= collision_grab_holdable(world, *index_a, *index_b);
+        events |= collision_grab_holdable(world, *index_b, *index_a);
     }
 
     events
@@ -559,10 +561,14 @@ fn collision_damage<const ENTITY_COUNT: usize>(
         && !entity_b.has_damage_invulnerability_timer()
     {
         if entity_b.has_holding() {
-            let holding = unsafe {world.components.holdings.get_unchecked(index_b)};
-            if unsafe {world.generational_index_allocator.is_allocated_unchecked(*holding)} {
+            let holding = unsafe { world.components.holdings.get_unchecked(index_b) };
+            if unsafe {
+                world
+                    .generational_index_allocator
+                    .is_allocated_unchecked(*holding)
+            } {
                 if holding.index == index_b {
-                    return Events::default()
+                    return Events::default();
                 }
             } else {
                 // Should remove it here, but that's a headache. TODO.
@@ -582,4 +588,50 @@ fn collision_damage<const ENTITY_COUNT: usize>(
     }
 
     Events::default()
+}
+
+fn collision_grab_holdable<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COUNT>, index_a: usize, index_b: usize) -> Events {
+    // A grabbing B.
+    let mut events = Events::default();
+
+    if !collides(world, index_a, index_b) {
+        return events;
+    }
+
+    let entity_a = unsafe { world.entities.get_unchecked(index_a) };
+    let entity_b = unsafe { world.entities.get_unchecked(index_b) };
+
+    if entity_a.has_grab() && entity_b.has_holdable() && entity_b.has_generation() && !entity_b.has_held() {
+        let grabbing = unsafe {world.components.grabs.get_unchecked(index_a)};
+        let generation_b = unsafe {world.components.generations.get_unchecked(index_b)};
+        if unsafe {world.generational_index_allocator.is_allocated_unchecked(*grabbing)} {
+            let generation_grabbing = unsafe {world.components.generations.get_unchecked(grabbing.index)};
+            let grabbing_entity = unsafe {world.entities.get_unchecked_mut(grabbing.index)};
+            if !grabbing_entity.has_holding() && grabbing_entity.has_position() && grabbing_entity.has_chunk() && grabbing_entity.has_facing_direction() && grabbing_entity.has_bounding_box() {
+                *grabbing_entity |= Entity::holding();
+                *unsafe {world.components.holdings.get_unchecked_mut(grabbing.index)} = components::EntityReference {
+                    index: index_b,
+                    generation: *generation_b,
+                };
+    
+                *unsafe {world.entities.get_unchecked_mut(index_b)} |= Entity::held() | Entity::position() | Entity::chunk() | Entity::facing_direction();
+                *unsafe {world.components.holdings.get_unchecked_mut(index_b)} = components::EntityReference {
+                    index: grabbing.index,
+                    generation: *generation_grabbing,
+                };
+                let held_facing_direction = unsafe {world.components.facing_directions.get_unchecked(grabbing.index)}.clone();
+                let mut held_position = unsafe{world.components.positions.get_unchecked(grabbing.index)}.clone();
+                let mut held_chunk = unsafe{world.components.chunks.get_unchecked(grabbing.index)}.clone();
+                let holder_bounding_box = unsafe{world.components.bounding_boxes.get_unchecked(grabbing.index)};
+                events |= movement(&mut held_position, &mut held_chunk, components::Direction::Right, holder_bounding_box.offset_x);
+                events |= movement(&mut held_position, &mut held_chunk, components::Direction::Down, holder_bounding_box.offset_y - 2);
+                events |= movement(&mut held_position, &mut held_chunk, held_facing_direction, 4);
+                *unsafe {world.components.facing_directions.get_unchecked_mut(index_b)} = held_facing_direction;
+                *unsafe {world.components.positions.get_unchecked_mut(index_b)} = held_position;
+                *unsafe {world.components.chunks.get_unchecked_mut(index_b)} = held_chunk;
+            }
+        }
+    }
+
+    events
 }

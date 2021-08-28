@@ -50,6 +50,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) holdings: Box<[components::EntityReference; ENTITY_COUNT]>,
     pub(crate) generations: Box<[components::Generation; ENTITY_COUNT]>,
     pub(crate) helds: Box<[components::EntityReference; ENTITY_COUNT]>,
+    pub(crate) grabs: Box<[components::EntityReference; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -76,6 +77,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             holdings: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
             generations: Box::new([components::Generation::default(); ENTITY_COUNT]),
             helds: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
+            grabs: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -207,8 +209,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::player()
                 | Entity::walking_timer()
                 | Entity::walking_animation_state()
-                | Entity::generation()
-                | Entity::holding(); // Temporary
+                | Entity::generation();
 
             *self
                 .components
@@ -269,14 +270,6 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .generations
                 .get_unchecked_mut(generational_index.index) = generational_index.generation;
-            // Temporary
-            *self
-                .components
-                .holdings
-                .get_unchecked_mut(generational_index.index) = GenerationalIndex {
-                index: 1,
-                generation: 0,
-            };
         }
 
         Some(generational_index)
@@ -293,7 +286,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::chunk()
                 | Entity::spritesheet_1x1()
                 | Entity::palette()
-                | Entity::held() // Temporary
+                | Entity::generation()
+                | Entity::holdable()
                 ;
 
             *self
@@ -329,14 +323,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 color_b: data::colors::SKYBLUE,
                 color_c: data::colors::VOID,
             };
-            // Temporary
-            *self
-                .components
-                .helds
-                .get_unchecked_mut(generational_index.index) = GenerationalIndex {
-                index: 0,
-                generation: 0,
-            };
+            *self.components.generations.get_unchecked_mut(generational_index.index) = generational_index.generation;
         }
 
         Some(generational_index)
@@ -375,6 +362,38 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         Some(generational_index)
     }
 
+    pub(crate) fn register_grab(&mut self, position: components::Position, chunk: components::Chunk, bounding_box: components::BoundingBox, grabber: components::EntityReference) -> Option<GenerationalIndex> {
+        let generational_index = self.generational_index_allocator.allocate()?;
+
+        unsafe {
+            *self.entities.get_unchecked_mut(generational_index.index) =
+                Entity::position() | Entity::chunk() | Entity::bounding_box() | Entity::grab() | Entity::generation();
+
+            *self
+                .components
+                .positions
+                .get_unchecked_mut(generational_index.index) = position;
+            *self
+                .components
+                .chunks
+                .get_unchecked_mut(generational_index.index) = chunk;
+            *self
+                .components
+                .bounding_boxes
+                .get_unchecked_mut(generational_index.index) = bounding_box;
+            *self
+                .components
+                .grabs
+                .get_unchecked_mut(generational_index.index) = grabber;
+            *self
+                .components
+                .generations
+                .get_unchecked_mut(generational_index.index) = generational_index.generation;
+        }
+
+        Some(generational_index)
+    }
+
     pub fn tick<T, RT>(
         &mut self,
         canvas: &mut Canvas<RT>,
@@ -407,6 +426,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         events |= system::decrement_damage_invulnerability_timer(self);
 
         events |= system::collisions(self);
+
+        events |= system::cleanup_grabs(self);
 
         events |= system::display_static_sprites(self, canvas, texture_creator, texture_cache);
         events |= system::display_sprites(self, canvas, texture_creator, texture_cache);

@@ -1,3 +1,4 @@
+mod cleanup_grabs;
 mod collisions;
 mod decrement_damage_invulnerability_timer;
 mod decrement_movement_delay;
@@ -13,6 +14,7 @@ mod player_input;
 mod rotate;
 mod toggle_walking_animation_state;
 
+pub(crate) use cleanup_grabs::cleanup_grabs;
 pub(crate) use collisions::collisions;
 pub(crate) use decrement_damage_invulnerability_timer::decrement_damage_invulnerability_timer;
 pub(crate) use decrement_movement_delay::decrement_movement_delay;
