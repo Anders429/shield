@@ -2,9 +2,11 @@ use crate::{
     components, constants,
     entity::Entity,
     events::{ChunkChange, Events, Input},
+    generational_index::GenerationalIndex,
     system::{find_pixel_difference, movement, rotate},
     World,
 };
+use enclose::enclose;
 use itertools::izip;
 
 pub(crate) fn player_input<const ENTITY_COUNT: usize>(
@@ -13,7 +15,9 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
 ) -> Events {
     let mut events = Events::default();
 
-    for (
+    let mut deferred_executions: Vec<Box<dyn Fn(&mut World<ENTITY_COUNT>) -> Events>> = Vec::new();
+
+    for (index, (
         entity,
         position,
         chunk,
@@ -23,7 +27,9 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
         walking_timer,
         walking_animation_state,
         moving_direction,
-    ) in izip!(
+        holding,
+        generation,
+    )) in izip!(
         world.entities.iter_mut(),
         world.components.positions.iter_mut(),
         world.components.chunks.iter_mut(),
@@ -33,29 +39,96 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
         world.components.walking_timers.iter_mut(),
         world.components.walking_animation_states.iter_mut(),
         world.components.moving_directions.iter_mut(),
-    ) {
+        world.components.holdings.iter(),
+        world.components.generations.iter(),
+    ).enumerate() {
         if entity.has_position()
             && entity.has_chunk()
             && entity.has_accepts_input()
             && entity.has_speed()
+            && entity.has_generation()
             && accepts_input.from_player()
         {
             if input.has_up() {
                 events |= movement(position, chunk, components::Direction::Up, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Up;
+                if entity.has_holding() {
+                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                        let mut events = Events::default();
+
+                        let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                        if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
+                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Up, speed);
+                            *held_entity |= Entity::moving_direction();
+                            *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Up;
+                        } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                            unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                        }
+
+                        events
+                    })));
+                }
             } else if input.has_right() {
                 events |= movement(position, chunk, components::Direction::Right, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Right;
+                if entity.has_holding() {
+                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                        let mut events = Events::default();
+
+                        let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                        if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
+                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Right, speed);
+                            *held_entity |= Entity::moving_direction();
+                            *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Right;
+                        } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                            unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                        }
+
+                        events
+                    })));
+                }
             } else if input.has_down() {
                 events |= movement(position, chunk, components::Direction::Down, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Down;
+                if entity.has_holding() {
+                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                        let mut events = Events::default();
+
+                        let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                        if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
+                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Down, speed);
+                            *held_entity |= Entity::moving_direction();
+                            *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Down;
+                        } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                            unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                        }
+
+                        events
+                    })));
+                }
             } else if input.has_left() {
                 events |= movement(position, chunk, components::Direction::Left, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Left;
+                if entity.has_holding() {
+                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                        let mut events = Events::default();
+
+                        let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                        if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
+                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Left, speed);
+                            *held_entity |= Entity::moving_direction();
+                            *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Left;
+                        } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                            unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                        }
+
+                        events
+                    })));
+                }
             }
 
             if entity.is_player() {
@@ -109,6 +182,10 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 }
             }
         }
+    }
+
+    for deferred_execution in deferred_executions {
+        events |= deferred_execution(world);
     }
 
     events

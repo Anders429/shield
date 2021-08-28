@@ -48,6 +48,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) moving_directions: Box<[components::Direction; ENTITY_COUNT]>,
     pub(crate) damage_invulnerability_timers: Box<[components::Timer; ENTITY_COUNT]>,
     pub(crate) holdings: Box<[components::EntityReference; ENTITY_COUNT]>,
+    pub(crate) generations: Box<[components::Generation; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -72,6 +73,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             moving_directions: Box::new([components::Direction::default(); ENTITY_COUNT]),
             damage_invulnerability_timers: Box::new([components::Timer::default(); ENTITY_COUNT]),
             holdings: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
+            generations: Box::new([components::Generation::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -202,7 +204,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::health_points()
                 | Entity::player()
                 | Entity::walking_timer()
-                | Entity::walking_animation_state();
+                | Entity::walking_animation_state()
+                | Entity::generation();
 
             *self
                 .components
@@ -259,6 +262,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .walking_animation_states
                 .get_unchecked_mut(generational_index.index) =
                 components::WalkingAnimationState::StandingA;
+            *self.components.generations.get_unchecked_mut(generational_index.index) = generational_index.generation;
         }
 
         Some(generational_index)

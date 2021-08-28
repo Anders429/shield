@@ -22,6 +22,7 @@ bitflags! {
         const MOVING_DIRECTION = 0b0000_0000_0000_0010_0000_0000_0000_0000;
         const DAMAGE_INVULNERABILITY_TIMER = 0b0000_0000_0000_0100_0000_0000_0000_0000;
         const HOLDING = 0b0000_0000_0000_1000_0000_0000_0000_0000;
+        const GENERATION = 0b0000_0000_0001_0000_0000_0000_0000_0000;
     }
 }
 
@@ -112,6 +113,10 @@ impl Entity {
         Self::HOLDING
     }
 
+    pub(crate) fn generation() -> Self {
+        Self::GENERATION
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -190,6 +195,10 @@ impl Entity {
 
     pub(crate) fn has_holding(&self) -> bool {
         self.contains(Self::HOLDING)
+    }
+
+    pub(crate) fn has_generation(&self) -> bool {
+        self.contains(Self::GENERATION)
     }
 
     pub(crate) fn remove_walking(&mut self) {
