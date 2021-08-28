@@ -49,6 +49,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) damage_invulnerability_timers: Box<[components::Timer; ENTITY_COUNT]>,
     pub(crate) holdings: Box<[components::EntityReference; ENTITY_COUNT]>,
     pub(crate) generations: Box<[components::Generation; ENTITY_COUNT]>,
+    pub(crate) helds: Box<[components::EntityReference; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -74,6 +75,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             damage_invulnerability_timers: Box::new([components::Timer::default(); ENTITY_COUNT]),
             holdings: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
             generations: Box::new([components::Generation::default(); ENTITY_COUNT]),
+            helds: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -290,7 +292,9 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::facing_direction()
                 | Entity::chunk()
                 | Entity::spritesheet_1x1()
-                | Entity::palette();
+                | Entity::palette()
+                | Entity::held() // Temporary
+                ;
 
             *self
                 .components
@@ -324,6 +328,14 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 color_a: data::colors::BROWN,
                 color_b: data::colors::SKYBLUE,
                 color_c: data::colors::VOID,
+            };
+            // Temporary
+            *self
+                .components
+                .helds
+                .get_unchecked_mut(generational_index.index) = GenerationalIndex {
+                index: 0,
+                generation: 0,
             };
         }
 

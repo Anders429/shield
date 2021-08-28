@@ -62,7 +62,10 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Up, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Up;
-                if entity.has_holding() && entity.has_facing_direction() && entity.has_bounding_box() {
+                if entity.has_holding()
+                    && entity.has_facing_direction()
+                    && entity.has_bounding_box()
+                {
                     deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
@@ -86,7 +89,10 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Right, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Right;
-                if entity.has_holding() && entity.has_facing_direction() && entity.has_bounding_box() {
+                if entity.has_holding()
+                    && entity.has_facing_direction()
+                    && entity.has_bounding_box()
+                {
                     deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
@@ -110,7 +116,10 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Down, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Down;
-                if entity.has_holding() && entity.has_facing_direction() && entity.has_bounding_box() {
+                if entity.has_holding()
+                    && entity.has_facing_direction()
+                    && entity.has_bounding_box()
+                {
                     deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
@@ -134,7 +143,10 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Left, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Left;
-                if entity.has_holding() && entity.has_facing_direction() && entity.has_bounding_box() {
+                if entity.has_holding()
+                    && entity.has_facing_direction()
+                    && entity.has_bounding_box()
+                {
                     deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
@@ -191,20 +203,22 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             // Already facing that direction?
             let rotation_needed = !match facing_direction {
                 components::Direction::Up => input.has_up(),
-                components::Direction::Right => input.has_right(),
-                components::Direction::Down => input.has_down(),
-                components::Direction::Left => input.has_left(),
+                components::Direction::Right => input.has_right() && !input.has_up(),
+                components::Direction::Down => input.has_down() && !input.has_up() && !input.has_right(),
+                components::Direction::Left => input.has_left() && !input.has_up() && !input.has_right() && !input.has_down(),
             };
             if rotation_needed {
                 if input.has_up() {
                     events |= rotate(facing_direction, components::Direction::Up);
                     if entity.has_holding() {
-                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                             if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Up);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Up, 4);
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
@@ -220,12 +234,14 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 } else if input.has_right() {
                     events |= rotate(facing_direction, components::Direction::Right);
                     if entity.has_holding() {
-                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                             if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Right);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Right, 4);
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
@@ -241,12 +257,14 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 } else if input.has_down() {
                     events |= rotate(facing_direction, components::Direction::Down);
                     if entity.has_holding() {
-                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                             if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Down);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Down, 4);
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
@@ -262,12 +280,14 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 } else if input.has_left() {
                     events |= rotate(facing_direction, components::Direction::Left);
                     if entity.has_holding() {
-                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk, bounding_box) move |world: &mut World<ENTITY_COUNT>| {
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                             if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Left);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Left, 4);
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;

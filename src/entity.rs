@@ -23,6 +23,7 @@ bitflags! {
         const DAMAGE_INVULNERABILITY_TIMER = 0b0000_0000_0000_0100_0000_0000_0000_0000;
         const HOLDING = 0b0000_0000_0000_1000_0000_0000_0000_0000;
         const GENERATION = 0b0000_0000_0001_0000_0000_0000_0000_0000;
+        const HELD = 0b0000_0000_0010_0000_0000_0000_0000_0000;
     }
 }
 
@@ -117,6 +118,10 @@ impl Entity {
         Self::GENERATION
     }
 
+    pub(crate) fn held() -> Self {
+        Self::HELD
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -201,6 +206,10 @@ impl Entity {
         self.contains(Self::GENERATION)
     }
 
+    pub(crate) fn has_held(&self) -> bool {
+        self.contains(Self::HELD)
+    }
+
     pub(crate) fn remove_walking(&mut self) {
         self.remove(Self::WALKING)
     }
@@ -215,5 +224,9 @@ impl Entity {
 
     pub(crate) fn remove_holding(&mut self) {
         self.remove(Self::HOLDING)
+    }
+
+    pub(crate) fn remove_held(&mut self) {
+        self.remove(Self::HELD)
     }
 }
