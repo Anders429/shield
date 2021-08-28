@@ -120,6 +120,7 @@ fn collision_moving_direction_immovable<const ENTITY_COUNT: usize>(
         let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
         let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
         let bounding_box_a = unsafe { world.components.bounding_boxes.get_unchecked(index_a) };
+        let holding_a = unsafe {world.components.holdings.get_unchecked(index_a)};
 
         match unsafe { world.components.moving_directions.get_unchecked(index_a) } {
             components::Direction::Up => {
@@ -127,60 +128,120 @@ fn collision_moving_direction_immovable<const ENTITY_COUNT: usize>(
                     find_pixel_difference(position_a.y, chunk_a.y, 0, 0, constants::CHUNK_HEIGHT);
                 let y_b =
                     find_pixel_difference(position_b.y, chunk_b.y, 0, 0, constants::CHUNK_HEIGHT);
+                let adjustment_amount = (y_b + bounding_box_b.offset_y as i16 + bounding_box_b.height as i16
+                    - (y_a + bounding_box_a.offset_y as i16))
+                    .unsigned_abs() as u8;
 
                 events |= movement(
                     position_a,
                     chunk_a,
                     components::Direction::Down,
-                    (y_b + bounding_box_b.offset_y as i16 + bounding_box_b.height as i16
-                        - (y_a + bounding_box_a.offset_y as i16))
-                        .unsigned_abs() as u8,
+                    adjustment_amount,
                 );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe {world.entities.get_unchecked_mut(holding_a.index)};
+                    if unsafe {world.generational_index_allocator.is_allocated_unchecked(*holding_a)} && held_entity.has_position() && held_entity.has_chunk() {
+                        events |= movement(
+                            unsafe {world.components.positions.get_unchecked_mut(holding_a.index)},
+                            unsafe {world.components.chunks.get_unchecked_mut(holding_a.index)},
+                            components::Direction::Down,
+                            adjustment_amount,
+                        );
+                    } else {
+                        unsafe {world.entities.get_unchecked_mut(index_a)}.remove_holding();
+                    }
+                }
             }
             components::Direction::Right => {
                 let x_a =
                     find_pixel_difference(position_a.x, chunk_a.x, 0, 0, constants::CHUNK_WIDTH);
                 let x_b =
                     find_pixel_difference(position_b.x, chunk_b.x, 0, 0, constants::CHUNK_WIDTH);
+                let adjustment_amount = (x_a + bounding_box_a.offset_x as i16 + bounding_box_a.width as i16
+                    - (x_b + bounding_box_b.offset_x as i16))
+                    .unsigned_abs() as u8;
 
                 events |= movement(
                     position_a,
                     chunk_a,
                     components::Direction::Left,
-                    (x_a + bounding_box_a.offset_x as i16 + bounding_box_a.width as i16
-                        - (x_b + bounding_box_b.offset_x as i16))
-                        .unsigned_abs() as u8,
+                    adjustment_amount,
                 );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe {world.entities.get_unchecked_mut(holding_a.index)};
+                    if unsafe {world.generational_index_allocator.is_allocated_unchecked(*holding_a)} && held_entity.has_position() && held_entity.has_chunk() {
+                        events |= movement(
+                            unsafe {world.components.positions.get_unchecked_mut(holding_a.index)},
+                            unsafe {world.components.chunks.get_unchecked_mut(holding_a.index)},
+                            components::Direction::Left,
+                            adjustment_amount,
+                        );
+                    } else {
+                        unsafe {world.entities.get_unchecked_mut(index_a)}.remove_holding();
+                    }
+                }
             }
             components::Direction::Down => {
                 let y_a =
                     find_pixel_difference(position_a.y, chunk_a.y, 0, 0, constants::CHUNK_HEIGHT);
                 let y_b =
                     find_pixel_difference(position_b.y, chunk_b.y, 0, 0, constants::CHUNK_HEIGHT);
+                let adjustment_amount = (y_a + bounding_box_a.offset_y as i16 + bounding_box_a.height as i16
+                    - (y_b + bounding_box_b.offset_y as i16))
+                    .unsigned_abs() as u8;
 
                 events |= movement(
                     position_a,
                     chunk_a,
                     components::Direction::Up,
-                    (y_a + bounding_box_a.offset_y as i16 + bounding_box_a.height as i16
-                        - (y_b + bounding_box_b.offset_y as i16))
-                        .unsigned_abs() as u8,
+                    adjustment_amount,
                 );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe {world.entities.get_unchecked_mut(holding_a.index)};
+                    if unsafe {world.generational_index_allocator.is_allocated_unchecked(*holding_a)} && held_entity.has_position() && held_entity.has_chunk() {
+                        events |= movement(
+                            unsafe {world.components.positions.get_unchecked_mut(holding_a.index)},
+                            unsafe {world.components.chunks.get_unchecked_mut(holding_a.index)},
+                            components::Direction::Up,
+                            adjustment_amount,
+                        );
+                    } else {
+                        unsafe {world.entities.get_unchecked_mut(index_a)}.remove_holding();
+                    }
+                }
             }
             components::Direction::Left => {
                 let x_a =
                     find_pixel_difference(position_a.x, chunk_a.x, 0, 0, constants::CHUNK_WIDTH);
                 let x_b =
                     find_pixel_difference(position_b.x, chunk_b.x, 0, 0, constants::CHUNK_WIDTH);
+                let adjustment_amount = (x_b + bounding_box_b.offset_x as i16 + bounding_box_b.width as i16
+                    - (x_a + bounding_box_a.offset_x as i16))
+                    .unsigned_abs() as u8;
 
                 events |= movement(
                     position_a,
                     chunk_a,
                     components::Direction::Right,
-                    (x_b + bounding_box_b.offset_x as i16 + bounding_box_b.width as i16
-                        - (x_a + bounding_box_a.offset_x as i16))
-                        .unsigned_abs() as u8,
+                    adjustment_amount,
                 );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe {world.entities.get_unchecked_mut(holding_a.index)};
+                    if unsafe {world.generational_index_allocator.is_allocated_unchecked(*holding_a)} && held_entity.has_position() && held_entity.has_chunk() {
+                        events |= movement(
+                            unsafe {world.components.positions.get_unchecked_mut(holding_a.index)},
+                            unsafe {world.components.chunks.get_unchecked_mut(holding_a.index)},
+                            components::Direction::Right,
+                            adjustment_amount,
+                        );
+                    } else {
+                        unsafe {world.entities.get_unchecked_mut(index_a)}.remove_holding();
+                    }
+                }
             }
         }
     }

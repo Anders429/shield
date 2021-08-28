@@ -217,9 +217,9 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .bounding_boxes
                 .get_unchecked_mut(generational_index.index) = components::BoundingBox {
                 width: 16,
-                height: 16,
+                height: 12,
                 offset_x: 0,
-                offset_y: 0,
+                offset_y: 4,
             };
             *self
                 .components
