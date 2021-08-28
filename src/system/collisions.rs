@@ -97,6 +97,8 @@ pub(crate) fn collisions<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COU
         events |= collision_held_immovable(world, *index_a, *index_b);
         events |= collision_held_immovable(world, *index_b, *index_a);
         events |= collision_movables(world, *index_a, *index_b);
+        events |= collision_held_movable(world, *index_a, *index_b);
+        events |= collision_held_movable(world, *index_b, *index_a);
         events |= collision_damage(world, *index_a, *index_b);
         events |= collision_damage(world, *index_b, *index_a);
         events |= collision_grab_holdable(world, *index_a, *index_b);
@@ -569,7 +571,7 @@ fn collision_movables<const ENTITY_COUNT: usize>(
     let holding_b = unsafe { world.components.holdings.get_unchecked(index_b) };
 
     if entity_a.has_moving_direction() && entity_b.has_moving_direction() {
-        match unsafe { world.components.moving_directions.get_unchecked(index_a) } {
+        match unsafe { world.components.facing_directions.get_unchecked(index_a) } {
             components::Direction::Up => {
                 let y_a =
                     find_pixel_difference(position_a.y, chunk_a.y, 0, 0, constants::CHUNK_HEIGHT);
@@ -882,6 +884,251 @@ fn collision_movables<const ENTITY_COUNT: usize>(
                     }
                 }
             }
+        }
+    }
+
+    events
+}
+
+fn collision_held_movable<const ENTITY_COUNT: usize>(
+    world: &mut World<ENTITY_COUNT>,
+    index_a: usize,
+    index_b: usize,
+) -> Events {
+    let mut events = Events::default();
+
+    if !collides(world, index_a, index_b) {
+        return events;
+    }
+
+    let entity_a = unsafe { world.entities.get_unchecked(index_a) };
+    let entity_b = unsafe { world.entities.get_unchecked(index_b) };
+
+    let position_b = unsafe { world.components.positions.get_unchecked(index_b) };
+    let chunk_b = unsafe { world.components.chunks.get_unchecked(index_b) };
+    let bounding_box_b = unsafe { world.components.bounding_boxes.get_unchecked(index_b) };
+    let position_a = unsafe { world.components.positions.get_unchecked(index_a) };
+    let chunk_a = unsafe { world.components.chunks.get_unchecked(index_a) };
+    let bounding_box_a = unsafe { world.components.bounding_boxes.get_unchecked(index_a) };
+
+    if entity_a.has_held() && entity_b.has_moving_direction() {
+        let held_by = unsafe { world.components.helds.get_unchecked(index_a) };
+        let holding_entity = unsafe { world.entities.get_unchecked(held_by.index) };
+        if unsafe {
+            world
+                .generational_index_allocator
+                .is_allocated_unchecked(*held_by)
+        } && holding_entity.has_position()
+            && holding_entity.has_chunk()
+            && holding_entity.has_moving_direction()
+        {
+            match unsafe {
+                world
+                    .components
+                    .facing_directions
+                    .get_unchecked(held_by.index)
+            } {
+                components::Direction::Up => {
+                    let y_a = find_pixel_difference(
+                        position_a.y,
+                        chunk_a.y,
+                        0,
+                        0,
+                        constants::CHUNK_HEIGHT,
+                    );
+                    let y_b = find_pixel_difference(
+                        position_b.y,
+                        chunk_b.y,
+                        0,
+                        0,
+                        constants::CHUNK_HEIGHT,
+                    );
+                    let adjustment_amount =
+                        (y_b + bounding_box_b.offset_y as i16 + bounding_box_b.height as i16
+                            - (y_a + bounding_box_a.offset_y as i16))
+                            .unsigned_abs() as u8;
+                    let adjustment_amount_a = adjustment_amount / 2;
+                    let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
+
+                    let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                    let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                    events |= movement(
+                        position_a,
+                        chunk_a,
+                        components::Direction::Down,
+                        adjustment_amount_a,
+                    );
+                    events |= movement(
+                        unsafe { world.components.positions.get_unchecked_mut(held_by.index) },
+                        unsafe { world.components.chunks.get_unchecked_mut(held_by.index) },
+                        components::Direction::Down,
+                        adjustment_amount_a,
+                    );
+                    let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                    let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                    events |= movement(
+                        position_b,
+                        chunk_b,
+                        components::Direction::Up,
+                        adjustment_amount_b,
+                    );
+                }
+                components::Direction::Right => {
+                    let x_a = find_pixel_difference(
+                        position_a.x,
+                        chunk_a.x,
+                        0,
+                        0,
+                        constants::CHUNK_WIDTH,
+                    );
+                    let x_b = find_pixel_difference(
+                        position_b.x,
+                        chunk_b.x,
+                        0,
+                        0,
+                        constants::CHUNK_WIDTH,
+                    );
+                    let adjustment_amount =
+                        (x_a + bounding_box_a.offset_x as i16 + bounding_box_a.width as i16
+                            - (x_b + bounding_box_b.offset_x as i16))
+                            .unsigned_abs() as u8;
+                            let adjustment_amount_a = adjustment_amount / 2;
+                            let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
+        
+                            let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                            let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                            events |= movement(
+                                position_a,
+                                chunk_a,
+                                components::Direction::Left,
+                                adjustment_amount_a,
+                            );
+                            events |= movement(
+                                unsafe { world.components.positions.get_unchecked_mut(held_by.index) },
+                                unsafe { world.components.chunks.get_unchecked_mut(held_by.index) },
+                                components::Direction::Left,
+                                adjustment_amount_a,
+                            );
+                            let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                            let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                            events |= movement(
+                                position_b,
+                                chunk_b,
+                                components::Direction::Right,
+                                adjustment_amount_b,
+                            );
+                }
+                components::Direction::Down => {
+                    let y_a = find_pixel_difference(
+                        position_a.y,
+                        chunk_a.y,
+                        0,
+                        0,
+                        constants::CHUNK_HEIGHT,
+                    );
+                    let y_b = find_pixel_difference(
+                        position_b.y,
+                        chunk_b.y,
+                        0,
+                        0,
+                        constants::CHUNK_HEIGHT,
+                    );
+                    let adjustment_amount =
+                        (y_a + bounding_box_a.offset_y as i16 + bounding_box_a.height as i16
+                            - (y_b + bounding_box_b.offset_y as i16))
+                            .unsigned_abs() as u8;
+                            let adjustment_amount_a = adjustment_amount / 2;
+                            let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
+        
+                            let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                            let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                            events |= movement(
+                                position_a,
+                                chunk_a,
+                                components::Direction::Up,
+                                adjustment_amount_a,
+                            );
+                            events |= movement(
+                                unsafe { world.components.positions.get_unchecked_mut(held_by.index) },
+                                unsafe { world.components.chunks.get_unchecked_mut(held_by.index) },
+                                components::Direction::Up,
+                                adjustment_amount_a,
+                            );
+                            let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                            let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                            events |= movement(
+                                position_b,
+                                chunk_b,
+                                components::Direction::Down,
+                                adjustment_amount_b,
+                            );
+                }
+                components::Direction::Left => {
+                    let x_a = find_pixel_difference(
+                        position_a.x,
+                        chunk_a.x,
+                        0,
+                        0,
+                        constants::CHUNK_WIDTH,
+                    );
+                    let x_b = find_pixel_difference(
+                        position_b.x,
+                        chunk_b.x,
+                        0,
+                        0,
+                        constants::CHUNK_WIDTH,
+                    );
+                    let adjustment_amount =
+                        (x_b + bounding_box_b.offset_x as i16 + bounding_box_b.width as i16
+                            - (x_a + bounding_box_a.offset_x as i16))
+                            .unsigned_abs() as u8;
+                            let adjustment_amount_a = adjustment_amount / 2;
+                            let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
+        
+                            let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                            let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                            events |= movement(
+                                position_a,
+                                chunk_a,
+                                components::Direction::Right,
+                                adjustment_amount_a,
+                            );
+                            events |= movement(
+                                unsafe { world.components.positions.get_unchecked_mut(held_by.index) },
+                                unsafe { world.components.chunks.get_unchecked_mut(held_by.index) },
+                                components::Direction::Right,
+                                adjustment_amount_a,
+                            );
+                            let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                            let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                            events |= movement(
+                                position_b,
+                                chunk_b,
+                                components::Direction::Left,
+                                adjustment_amount_b,
+                            );
+                }
+            }
+        } else {
+            // Arbitrarily move down.
+            let y_a = find_pixel_difference(position_a.y, chunk_a.y, 0, 0, constants::CHUNK_HEIGHT);
+            let y_b = find_pixel_difference(position_b.y, chunk_b.y, 0, 0, constants::CHUNK_HEIGHT);
+            let adjustment_amount =
+                (y_b + bounding_box_b.offset_y as i16 + bounding_box_b.height as i16
+                    - (y_a + bounding_box_a.offset_y as i16))
+                    .unsigned_abs() as u8;
+
+            let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+            let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+            events |= movement(
+                position_a,
+                chunk_a,
+                components::Direction::Down,
+                adjustment_amount,
+            );
+
+            // Remove the invalid entity reference.
+            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_held();
         }
     }
 
