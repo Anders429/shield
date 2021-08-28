@@ -28,6 +28,7 @@ use tile::Tile;
 struct Resources {
     chunk: components::Chunk,
     position: components::Position,
+    game_state: components::GameState,
 }
 
 struct Components<'a, const ENTITY_COUNT: usize> {
@@ -520,30 +521,38 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
     {
         let mut events = Events::default();
 
-        events |= system::reset_shield_use(self);
-
         events |= system::event_handler(event_pump);
-        events |= system::player_input(self, events.unwrap_input().unwrap_or(Input::default()));
-        events |= system::follow_player(self);
 
-        events |= system::toggle_walking_animation_state(self);
+        if matches!(self.resources.game_state, components::GameState::Playing) {
+            events |= system::reset_shield_use(self);
 
-        for (entity, movement_delay, speed) in izip!(
-            self.entities.iter(),
-            self.components.movement_delays.iter_mut(),
-            self.components.speeds.iter(),
-        ) {
-            if entity.has_movement_delay() && entity.has_speed() {
-                events |= system::decrement_movement_delay(movement_delay, *speed);
+            events |= system::player_input(self, events.unwrap_input().unwrap_or(Input::default()));
+            events |= system::follow_player(self);
+
+            events |= system::toggle_walking_animation_state(self);
+
+            for (entity, movement_delay, speed) in izip!(
+                self.entities.iter(),
+                self.components.movement_delays.iter_mut(),
+                self.components.speeds.iter(),
+            ) {
+                if entity.has_movement_delay() && entity.has_speed() {
+                    events |= system::decrement_movement_delay(movement_delay, *speed);
+                }
             }
+            events |= system::decrement_damage_invulnerability_timer(self);
+            events |= system::decrement_use_cooldown(self);
+            events |= system::decrement_retreating(self);
+
+            events |= system::collisions(self);
+
+            events |= system::cleanup_grabs(self);
+            events |= system::clean_up_dead(self);
         }
-        events |= system::decrement_damage_invulnerability_timer(self);
-        events |= system::decrement_use_cooldown(self);
-        events |= system::decrement_retreating(self);
-
-        events |= system::collisions(self);
-
-        events |= system::cleanup_grabs(self);
+        if matches!(self.resources.game_state, components::GameState::GameOver) {
+            events |= system::remove_all_but_player(self);
+            events |= system::restart(self, events.unwrap_input().unwrap_or(Input::default()));
+        }
 
         events |= system::display_static_sprites(self, canvas, texture_creator, texture_cache);
         events |= system::display_sprites(self, canvas, texture_creator, texture_cache);
