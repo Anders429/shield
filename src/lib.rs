@@ -123,9 +123,13 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         if let None = self.register_shield() {
             return Err(anyhow::format_err!("Unable to register shield."));
         }
-        if let None = self.register_slime(constants::STARTING_POSITION, constants::STARTING_CHUNK) {
-            return Err(anyhow::format_err!("Unable to register slime."));
-        }
+        self.register_slime(components::Position {x: 255, y: 75}, components::Chunk {x: 0, y: 1});
+        self.register_slime(components::Position {x: 255, y: 500}, components::Chunk {x: 0, y: 0});
+        self.register_slime(components::Position {x: 200, y: 500}, components::Chunk {x: 0, y: 0});
+        self.register_slime(components::Position {x: 0, y: 75}, components::Chunk {x: 1, y: 1});
+        self.register_slime(components::Position {x: 16, y: 75}, components::Chunk {x: 1, y: 1});
+        self.register_slime(components::Position {x: 0, y: 250}, components::Chunk {x: 1, y: 1});
+        self.register_slime(components::Position {x: 16, y: 250}, components::Chunk {x: 1, y: 1});
         self.resources.chunk = constants::STARTING_CHUNK;
         self.resources.position = constants::STARTING_POSITION;
         

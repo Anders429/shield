@@ -1144,6 +1144,12 @@ fn collision_damage<const ENTITY_COUNT: usize>(
     let entity_a = unsafe { world.entities.get_unchecked(index_a) }.clone();
     let entity_b = unsafe { world.entities.get_unchecked_mut(index_b) };
 
+    if entity_a.has_accepts_input() && entity_b.has_accepts_input() {
+        if *unsafe {world.components.accepts_input.get_unchecked(index_a)} == *unsafe {world.components.accepts_input.get_unchecked(index_b)} {
+            return Events::default();
+        }
+    }
+
     if entity_a.has_damage()
         && entity_b.has_health_points()
         && !entity_b.has_damage_invulnerability_timer()
