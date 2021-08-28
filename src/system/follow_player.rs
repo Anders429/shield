@@ -15,10 +15,17 @@ pub(crate) fn follow_player<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_
         }
     }
 
-    for (entity, position, chunk, facing_direction, moving_direction, accepts_input) in izip!(world.entities.iter(), world.components.positions.iter_mut(), world.components.chunks.iter_mut(), world.components.facing_directions.iter_mut(), world.components.moving_directions.iter_mut(), world.components.accepts_input.iter()) {
+    for (entity, position, chunk, facing_direction, moving_direction, accepts_input, retreating) in izip!(world.entities.iter(), world.components.positions.iter_mut(), world.components.chunks.iter_mut(), world.components.facing_directions.iter_mut(), world.components.moving_directions.iter_mut(), world.components.accepts_input.iter(), world.components.retreatings.iter()) {
         if entity.has_accepts_input() && accepts_input.follows_player() && entity.has_position() && entity.has_chunk() && entity.has_facing_direction() {
-            let x_delta = find_pixel_difference(position.x, chunk.x, player_position.x, player_chunk.x, constants::CHUNK_WIDTH);
-            let y_delta = find_pixel_difference(position.y, chunk.y, player_position.y, player_chunk.y, constants::CHUNK_HEIGHT);
+            let mut x_delta = find_pixel_difference(position.x, chunk.x, player_position.x, player_chunk.x, constants::CHUNK_WIDTH);
+            let mut y_delta = find_pixel_difference(position.y, chunk.y, player_position.y, player_chunk.y, constants::CHUNK_HEIGHT);
+
+            if entity.has_retreating() {
+                if *retreating > 0 {
+                    x_delta = -x_delta;
+                    y_delta = -y_delta;
+                }
+            }
 
             match facing_direction {
                 components::Direction::Up => {

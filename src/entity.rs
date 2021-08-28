@@ -28,6 +28,7 @@ bitflags! {
         const HOLDABLE = 0b0000_0000_1000_0000_0000_0000_0000_0000;
         const USABLE = 0b0000_0001_0000_0000_0000_0000_0000_0000;
         const USE_COOLDOWN = 0b0000_0010_0000_0000_0000_0000_0000_0000;
+        const RETREATING = 0b0000_0100_0000_0000_0000_0000_0000_0000;
     }
 }
 
@@ -142,6 +143,10 @@ impl Entity {
         Self::USE_COOLDOWN
     }
 
+    pub(crate) fn retreating() -> Self {
+        Self::RETREATING
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -246,6 +251,10 @@ impl Entity {
         self.contains(Self::USE_COOLDOWN)
     }
 
+    pub(crate) fn has_retreating(&self) -> bool {
+        self.contains(Self::RETREATING)
+    }
+
     pub(crate) fn remove_walking(&mut self) {
         self.remove(Self::WALKING)
     }
@@ -268,5 +277,9 @@ impl Entity {
 
     pub(crate) fn remove_use_cooldown(&mut self) {
         self.remove(Self::USE_COOLDOWN)
+    }
+
+    pub(crate) fn remove_retreating(&mut self) {
+        self.remove(Self::RETREATING)
     }
 }

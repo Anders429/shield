@@ -581,6 +581,10 @@ fn collision_damage<const ENTITY_COUNT: usize>(
                 .damage_invulnerability_timers
                 .get_unchecked_mut(index_b) = 60;
         }
+        if entity_a.has_accepts_input() && unsafe {world.components.accepts_input.get_unchecked(index_a)}.follows_player() {
+            *unsafe {world.entities.get_unchecked_mut(index_a)} |= Entity::RETREATING;
+            *unsafe {world.components.retreatings.get_unchecked_mut(index_a)} = 240;
+        }
     }
 
     Events::default()
