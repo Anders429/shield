@@ -43,6 +43,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) walking_timers: Box<[components::Timer; ENTITY_COUNT]>,
     pub(crate) walking_animation_states: Box<[components::WalkingAnimationState; ENTITY_COUNT]>,
     pub(crate) damages: Box<[components::Damage; ENTITY_COUNT]>,
+    pub(crate) moving_directions: Box<[components::Direction; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -64,6 +65,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
                 [components::WalkingAnimationState::default(); ENTITY_COUNT],
             ),
             damages: Box::new([components::Damage::default(); ENTITY_COUNT]),
+            moving_directions: Box::new([components::Direction::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -152,13 +154,19 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             ) {
                 // TEMPORARY
                 unsafe {
-                    *self.entities.get_unchecked_mut(generational_index.index) |= Entity::bounding_box() | Entity::damage() | Entity::immovable();
-        
+                    *self.entities.get_unchecked_mut(generational_index.index) |=
+                        Entity::bounding_box() | Entity::damage() | Entity::immovable();
+
                     *self
                         .components
                         .bounding_boxes
-                        .get_unchecked_mut(generational_index.index) = components::BoundingBox {width: 16, height: 16, offset_x: 0, offset_y: 0};
-                        *self
+                        .get_unchecked_mut(generational_index.index) = components::BoundingBox {
+                        width: 16,
+                        height: 16,
+                        offset_x: 0,
+                        offset_y: 0,
+                    };
+                    *self
                         .components
                         .damages
                         .get_unchecked_mut(generational_index.index) = 1;
@@ -195,11 +203,11 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .bounding_boxes
                 .get_unchecked_mut(generational_index.index) = components::BoundingBox {
-                    width: 16,
-                    height: 16,
-                    offset_x: 0,
-                    offset_y: 0,
-                };
+                width: 16,
+                height: 16,
+                offset_x: 0,
+                offset_y: 0,
+            };
             *self
                 .components
                 .facing_directions

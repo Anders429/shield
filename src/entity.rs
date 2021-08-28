@@ -19,6 +19,7 @@ bitflags! {
         const WALKING_ANIMATION_STATE = 0b0000_0000_0000_0000_0100_0000_0000_0000;
         const DAMAGE = 0b0000_0000_0000_0000_1000_0000_0000_0000;
         const IMMOVABLE = 0b0000_0000_0000_0001_0000_0000_0000_0000;
+        const MOVING_DIRECTION = 0b0000_0000_0000_0010_0000_0000_0000_0000;
     }
 }
 
@@ -97,6 +98,10 @@ impl Entity {
         Self::IMMOVABLE
     }
 
+    pub(crate) fn moving_direction() -> Self {
+        Self::MOVING_DIRECTION
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -165,7 +170,15 @@ impl Entity {
         self.contains(Self::IMMOVABLE)
     }
 
+    pub(crate) fn has_moving_direction(&self) -> bool {
+        self.contains(Self::MOVING_DIRECTION)
+    }
+
     pub(crate) fn remove_walking(&mut self) {
         self.remove(Self::WALKING)
+    }
+
+    pub(crate) fn remove_moving_direction(&mut self) {
+        self.remove(Self::MOVING_DIRECTION)
     }
 }
