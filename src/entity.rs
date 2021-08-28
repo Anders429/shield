@@ -27,6 +27,7 @@ bitflags! {
         const GRAB = 0b0000_0000_0100_0000_0000_0000_0000_0000;
         const HOLDABLE = 0b0000_0000_1000_0000_0000_0000_0000_0000;
         const USABLE = 0b0000_0001_0000_0000_0000_0000_0000_0000;
+        const USE_COOLDOWN = 0b0000_0010_0000_0000_0000_0000_0000_0000;
     }
 }
 
@@ -137,6 +138,10 @@ impl Entity {
         Self::USABLE
     }
 
+    pub(crate) fn use_cooldown() -> Self {
+        Self::USE_COOLDOWN
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -237,6 +242,10 @@ impl Entity {
         self.contains(Self::USABLE)
     }
 
+    pub(crate) fn has_use_cooldown(&self) -> bool {
+        self.contains(Self::USE_COOLDOWN)
+    }
+
     pub(crate) fn remove_walking(&mut self) {
         self.remove(Self::WALKING)
     }
@@ -255,5 +264,9 @@ impl Entity {
 
     pub(crate) fn remove_held(&mut self) {
         self.remove(Self::HELD)
+    }
+
+    pub(crate) fn remove_use_cooldown(&mut self) {
+        self.remove(Self::USE_COOLDOWN)
     }
 }

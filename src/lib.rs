@@ -52,6 +52,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) helds: Box<[components::EntityReference; ENTITY_COUNT]>,
     pub(crate) grabs: Box<[components::EntityReference; ENTITY_COUNT]>,
     pub(crate) usables: Box<[components::Usable; ENTITY_COUNT]>,
+    pub(crate) use_cooldowns: Box<[components::Timer; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -80,6 +81,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             helds: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
             grabs: Box::new([components::EntityReference::default(); ENTITY_COUNT]),
             usables: Box::new([components::Usable::default(); ENTITY_COUNT]),
+            use_cooldowns: Box::new([components::Timer::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -444,6 +446,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             }
         }
         events |= system::decrement_damage_invulnerability_timer(self);
+        events |= system::decrement_use_cooldown(self);
 
         events |= system::collisions(self);
 
