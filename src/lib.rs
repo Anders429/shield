@@ -513,6 +513,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
 
         events |= system::event_handler(event_pump);
         events |= system::player_input(self, events.unwrap_input().unwrap_or(Input::default()));
+        events |= system::follow_player(self);
 
         events |= system::toggle_walking_animation_state(self);
 
