@@ -45,3 +45,26 @@ pub(crate) static SHIELD: SpriteSheet<1, 1> = SpriteSheet {
         [[&super::sprites::SHIELD_LEFT]],
     ],
 };
+
+pub(crate) static SLIME: SpriteSheet<1, 1> = SpriteSheet {
+    up: [
+        [[&super::sprites::SLIME_UP]],
+        [[&super::sprites::SLIME_UP]],
+        [[&super::sprites::SLIME_UP]],
+    ],
+    right: [
+        [[&super::sprites::SLIME_RIGHT]],
+        [[&super::sprites::SLIME_RIGHT]],
+        [[&super::sprites::SLIME_RIGHT]],
+    ],
+    down: [
+        [[&super::sprites::SLIME_DOWN]],
+        [[&super::sprites::SLIME_DOWN]],
+        [[&super::sprites::SLIME_DOWN]],
+    ],
+    left: [
+        [[&super::sprites::SLIME_LEFT]],
+        [[&super::sprites::SLIME_LEFT]],
+        [[&super::sprites::SLIME_LEFT]],
+    ],
+};
