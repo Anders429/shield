@@ -16,21 +16,25 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
     let mut events = Events::default();
 
     // This is used for held entites, to avoid having double mut aliases. Defers a system execution to the end.
-    let mut deferred_executions: Vec<Box<dyn FnMut(&mut World<ENTITY_COUNT>) -> Events>> = Vec::new();
+    let mut deferred_executions: Vec<Box<dyn FnMut(&mut World<ENTITY_COUNT>) -> Events>> =
+        Vec::new();
 
-    for (index, (
-        entity,
-        position,
-        chunk,
-        accepts_input,
-        speed,
-        facing_direction,
-        walking_timer,
-        walking_animation_state,
-        moving_direction,
-        holding,
-        generation,
-    )) in izip!(
+    for (
+        index,
+        (
+            entity,
+            position,
+            chunk,
+            accepts_input,
+            speed,
+            facing_direction,
+            walking_timer,
+            walking_animation_state,
+            moving_direction,
+            holding,
+            generation,
+        ),
+    ) in izip!(
         world.entities.iter_mut(),
         world.components.positions.iter_mut(),
         world.components.chunks.iter_mut(),
@@ -42,7 +46,9 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
         world.components.moving_directions.iter_mut(),
         world.components.holdings.iter(),
         world.components.generations.iter(),
-    ).enumerate() {
+    )
+    .enumerate()
+    {
         if entity.has_position()
             && entity.has_chunk()
             && entity.has_accepts_input()
@@ -209,7 +215,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
                             }
-                                
+
                             events
                         })));
                     }
@@ -230,7 +236,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
                             }
-                                
+
                             events
                         })));
                     }
@@ -251,7 +257,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
                             }
-                                
+
                             events
                         })));
                     }
@@ -272,7 +278,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
                             }
-                                
+
                             events
                         })));
                     }
