@@ -1,5 +1,6 @@
 use crate::{
     components, constants,
+    entity::Entity,
     events::Events,
     system::{find_pixel_difference, movement},
     World,
@@ -93,6 +94,8 @@ pub(crate) fn collisions<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COU
         // Movement adjustments.
         events |= collision_moving_direction_immovable(world, *index_a, *index_b);
         events |= collision_moving_direction_immovable(world, *index_b, *index_a);
+        events |= collision_damage(world, *index_a, *index_b);
+        events |= collision_damage(world, *index_b, *index_a);
     }
 
     events
@@ -183,4 +186,29 @@ fn collision_moving_direction_immovable<const ENTITY_COUNT: usize>(
     }
 
     events
+}
+
+fn collision_damage<const ENTITY_COUNT: usize>(
+    world: &mut World<ENTITY_COUNT>,
+    index_a: usize,
+    index_b: usize,
+) -> Events {
+    // A damages B.
+    let entity_a = unsafe { world.entities.get_unchecked(index_a) }.clone();
+    let entity_b = unsafe { world.entities.get_unchecked_mut(index_b) };
+
+    if entity_a.has_damage() && entity_b.has_health_points() && !entity_b.has_damage_invulnerability_timer() {
+        unsafe {
+            let health_points = world
+            .components
+            .health_points
+            .get_unchecked_mut(index_b);
+            health_points
+                .current = health_points.current.saturating_sub(*world.components.damages.get_unchecked(index_a));
+            *entity_b |= Entity::damage_invulnerability_timer();
+            *world.components.damage_invulnerability_timers.get_unchecked_mut(index_b) = 60;
+        }
+    }
+
+    Events::default()
 }

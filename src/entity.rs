@@ -20,6 +20,7 @@ bitflags! {
         const DAMAGE = 0b0000_0000_0000_0000_1000_0000_0000_0000;
         const IMMOVABLE = 0b0000_0000_0000_0001_0000_0000_0000_0000;
         const MOVING_DIRECTION = 0b0000_0000_0000_0010_0000_0000_0000_0000;
+        const DAMAGE_INVULNERABILITY_TIMER = 0b0000_0000_0000_0100_0000_0000_0000_0000;
     }
 }
 
@@ -102,6 +103,10 @@ impl Entity {
         Self::MOVING_DIRECTION
     }
 
+    pub(crate) fn damage_invulnerability_timer() -> Self {
+        Self::DAMAGE_INVULNERABILITY_TIMER
+    }
+
     pub(crate) fn has_position(&self) -> bool {
         self.contains(Self::POSITION)
     }
@@ -174,11 +179,19 @@ impl Entity {
         self.contains(Self::MOVING_DIRECTION)
     }
 
+    pub(crate) fn has_damage_invulnerability_timer(&self) -> bool {
+        self.contains(Self::DAMAGE_INVULNERABILITY_TIMER)
+    }
+
     pub(crate) fn remove_walking(&mut self) {
         self.remove(Self::WALKING)
     }
 
     pub(crate) fn remove_moving_direction(&mut self) {
         self.remove(Self::MOVING_DIRECTION)
+    }
+
+    pub(crate) fn remove_damage_invulnerability_timer(&mut self) {
+        self.remove(Self::DAMAGE_INVULNERABILITY_TIMER)
     }
 }

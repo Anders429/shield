@@ -44,6 +44,7 @@ struct Components<'a, const ENTITY_COUNT: usize> {
     pub(crate) walking_animation_states: Box<[components::WalkingAnimationState; ENTITY_COUNT]>,
     pub(crate) damages: Box<[components::Damage; ENTITY_COUNT]>,
     pub(crate) moving_directions: Box<[components::Direction; ENTITY_COUNT]>,
+    pub(crate) damage_invulnerability_timers: Box<[components::Timer; ENTITY_COUNT]>,
 }
 
 impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
@@ -66,6 +67,7 @@ impl<const ENTITY_COUNT: usize> Default for Components<'_, ENTITY_COUNT> {
             ),
             damages: Box::new([components::Damage::default(); ENTITY_COUNT]),
             moving_directions: Box::new([components::Direction::default(); ENTITY_COUNT]),
+            damage_invulnerability_timers: Box::new([components::Timer::default(); ENTITY_COUNT]),
         }
     }
 }
@@ -321,6 +323,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 events |= system::decrement_movement_delay(movement_delay, *speed);
             }
         }
+        events |= system::decrement_damage_invulnerability_timer(self);
 
         events |= system::collisions(self);
 

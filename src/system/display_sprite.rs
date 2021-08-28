@@ -35,7 +35,7 @@ where
                 Err(_) => return Events::default(),
             };
             texture.set_blend_mode(BlendMode::Blend);
-            let mut raw_pixels = sprite.to_argb32_pixels(&palette);
+            let raw_pixels = sprite.to_argb32_pixels(&palette);
             match texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
                 for (i, v) in raw_pixels.iter().enumerate() {
                     buffer[i] = *v;
