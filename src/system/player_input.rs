@@ -78,7 +78,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
-                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() && held_entity.has_bounding_box() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Up);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
@@ -86,6 +86,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
                                     *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                    *world.components.bounding_boxes.get_unchecked_mut(holding.index) = components::BoundingBox {
+                                        width: 16,
+                                        height: 2,
+                                        offset_x: 0,
+                                        offset_y: 0,
+                                    };
                                 }
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
@@ -106,7 +112,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
-                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() && held_entity.has_bounding_box() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Right);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
@@ -114,6 +120,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
                                     *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                    *world.components.bounding_boxes.get_unchecked_mut(holding.index) = components::BoundingBox {
+                                        width: 4,
+                                        height: 14,
+                                        offset_x: 12,
+                                        offset_y: 2,
+                                    };
                                 }
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
@@ -134,7 +146,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
-                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() && held_entity.has_bounding_box() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Down);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
@@ -142,6 +154,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
                                     *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                    *world.components.bounding_boxes.get_unchecked_mut(holding.index) = components::BoundingBox {
+                                        width: 16,
+                                        height: 6,
+                                        offset_x: 0,
+                                        offset_y: 10,
+                                    };
                                 }
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
@@ -162,7 +180,7 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                             let mut events = Events::default();
 
                             let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
-                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() && held_entity.has_bounding_box() {
                                 events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Left);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Right, bounding_box.offset_x);
                                 events |= movement(&mut position, &mut chunk, components::Direction::Down, bounding_box.offset_y - 2);
@@ -170,6 +188,12 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                                 unsafe {
                                     *world.components.positions.get_unchecked_mut(holding.index) = position;
                                     *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                    *world.components.bounding_boxes.get_unchecked_mut(holding.index) = components::BoundingBox {
+                                        width: 4,
+                                        height: 14,
+                                        offset_x: 0,
+                                        offset_y: 2,
+                                    };
                                 }
                             } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
                                 unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
@@ -387,7 +411,16 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             entity.remove_holding();
             deferred_executions.push(Box::new(enclose!((holding) move |world: &mut World<ENTITY_COUNT>| {
                 if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} {
-                    unsafe {world.entities.get_unchecked_mut(holding.index)}.remove_held();
+                    let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                    held_entity.remove_held();
+                    if held_entity.has_bounding_box() {
+                        *unsafe {world.components.bounding_boxes.get_unchecked_mut(holding.index)} = components::BoundingBox {
+                            width: 16,
+                            height: 16,
+                            offset_x: 0,
+                            offset_y: 0,
+                        };
+                    }
                 }
                 Events::default()
             })));

@@ -548,10 +548,6 @@ fn collision_damage<const ENTITY_COUNT: usize>(
     index_a: usize,
     index_b: usize,
 ) -> Events {
-    if !collides(world, index_a, index_b) {
-        return Events::default();
-    }
-
     // A damages B.
     let entity_a = unsafe { world.entities.get_unchecked(index_a) }.clone();
     let entity_b = unsafe { world.entities.get_unchecked_mut(index_b) };
