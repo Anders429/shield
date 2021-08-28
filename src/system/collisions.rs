@@ -545,7 +545,11 @@ fn collision_held_immovable<const ENTITY_COUNT: usize>(
 }
 
 // Only needs to be done one direction.
-fn collision_movables<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COUNT>, index_a: usize, index_b: usize) -> Events {
+fn collision_movables<const ENTITY_COUNT: usize>(
+    world: &mut World<ENTITY_COUNT>,
+    index_a: usize,
+    index_b: usize,
+) -> Events {
     let mut events = Events::default();
 
     if !collides(world, index_a, index_b) {
@@ -653,74 +657,74 @@ fn collision_movables<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COUNT>
                     (x_a + bounding_box_a.offset_x as i16 + bounding_box_a.width as i16
                         - (x_b + bounding_box_b.offset_x as i16))
                         .unsigned_abs() as u8;
-                    let adjustment_amount_a = adjustment_amount / 2;
-                    let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
-    
-                    let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
-                    let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
-                    events |= movement(
-                        position_a,
-                        chunk_a,
-                        components::Direction::Left,
-                        adjustment_amount_a,
-                    );
-                    let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
-                    let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
-                    events |= movement(
-                        position_b,
-                        chunk_b,
-                        components::Direction::Right,
-                        adjustment_amount_b,
-                    );
+                let adjustment_amount_a = adjustment_amount / 2;
+                let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
 
-                    if entity_a.has_holding() {
-                        let held_entity = unsafe { world.entities.get_unchecked_mut(holding_a.index) };
-                        if unsafe {
-                            world
-                                .generational_index_allocator
-                                .is_allocated_unchecked(*holding_a)
-                        } && held_entity.has_position()
-                            && held_entity.has_chunk()
-                        {
-                            events |= movement(
-                                unsafe {
-                                    world
-                                        .components
-                                        .positions
-                                        .get_unchecked_mut(holding_a.index)
-                                },
-                                unsafe { world.components.chunks.get_unchecked_mut(holding_a.index) },
-                                components::Direction::Left,
-                                adjustment_amount_a,
-                            );
-                        } else {
-                            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
-                        }
+                let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                events |= movement(
+                    position_a,
+                    chunk_a,
+                    components::Direction::Left,
+                    adjustment_amount_a,
+                );
+                let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                events |= movement(
+                    position_b,
+                    chunk_b,
+                    components::Direction::Right,
+                    adjustment_amount_b,
+                );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe { world.entities.get_unchecked_mut(holding_a.index) };
+                    if unsafe {
+                        world
+                            .generational_index_allocator
+                            .is_allocated_unchecked(*holding_a)
+                    } && held_entity.has_position()
+                        && held_entity.has_chunk()
+                    {
+                        events |= movement(
+                            unsafe {
+                                world
+                                    .components
+                                    .positions
+                                    .get_unchecked_mut(holding_a.index)
+                            },
+                            unsafe { world.components.chunks.get_unchecked_mut(holding_a.index) },
+                            components::Direction::Left,
+                            adjustment_amount_a,
+                        );
+                    } else {
+                        unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
                     }
-                    if entity_b.has_holding() {
-                        let held_entity = unsafe { world.entities.get_unchecked_mut(holding_b.index) };
-                        if unsafe {
-                            world
-                                .generational_index_allocator
-                                .is_allocated_unchecked(*holding_b)
-                        } && held_entity.has_position()
-                            && held_entity.has_chunk()
-                        {
-                            events |= movement(
-                                unsafe {
-                                    world
-                                        .components
-                                        .positions
-                                        .get_unchecked_mut(holding_b.index)
-                                },
-                                unsafe { world.components.chunks.get_unchecked_mut(holding_b.index) },
-                                components::Direction::Right,
-                                adjustment_amount_b,
-                            );
-                        } else {
-                            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
-                        }
+                }
+                if entity_b.has_holding() {
+                    let held_entity = unsafe { world.entities.get_unchecked_mut(holding_b.index) };
+                    if unsafe {
+                        world
+                            .generational_index_allocator
+                            .is_allocated_unchecked(*holding_b)
+                    } && held_entity.has_position()
+                        && held_entity.has_chunk()
+                    {
+                        events |= movement(
+                            unsafe {
+                                world
+                                    .components
+                                    .positions
+                                    .get_unchecked_mut(holding_b.index)
+                            },
+                            unsafe { world.components.chunks.get_unchecked_mut(holding_b.index) },
+                            components::Direction::Right,
+                            adjustment_amount_b,
+                        );
+                    } else {
+                        unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
                     }
+                }
             }
             components::Direction::Down => {
                 let y_a =
@@ -731,74 +735,74 @@ fn collision_movables<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COUNT>
                     (y_a + bounding_box_a.offset_y as i16 + bounding_box_a.height as i16
                         - (y_b + bounding_box_b.offset_y as i16))
                         .unsigned_abs() as u8;
-                    let adjustment_amount_a = adjustment_amount / 2;
-                    let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
-    
-                    let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
-                    let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
-                    events |= movement(
-                        position_a,
-                        chunk_a,
-                        components::Direction::Up,
-                        adjustment_amount_a,
-                    );
-                    let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
-                    let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
-                    events |= movement(
-                        position_b,
-                        chunk_b,
-                        components::Direction::Down,
-                        adjustment_amount_b,
-                    );
+                let adjustment_amount_a = adjustment_amount / 2;
+                let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
 
-                    if entity_a.has_holding() {
-                        let held_entity = unsafe { world.entities.get_unchecked_mut(holding_a.index) };
-                        if unsafe {
-                            world
-                                .generational_index_allocator
-                                .is_allocated_unchecked(*holding_a)
-                        } && held_entity.has_position()
-                            && held_entity.has_chunk()
-                        {
-                            events |= movement(
-                                unsafe {
-                                    world
-                                        .components
-                                        .positions
-                                        .get_unchecked_mut(holding_a.index)
-                                },
-                                unsafe { world.components.chunks.get_unchecked_mut(holding_a.index) },
-                                components::Direction::Up,
-                                adjustment_amount_a,
-                            );
-                        } else {
-                            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
-                        }
+                let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                events |= movement(
+                    position_a,
+                    chunk_a,
+                    components::Direction::Up,
+                    adjustment_amount_a,
+                );
+                let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                events |= movement(
+                    position_b,
+                    chunk_b,
+                    components::Direction::Down,
+                    adjustment_amount_b,
+                );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe { world.entities.get_unchecked_mut(holding_a.index) };
+                    if unsafe {
+                        world
+                            .generational_index_allocator
+                            .is_allocated_unchecked(*holding_a)
+                    } && held_entity.has_position()
+                        && held_entity.has_chunk()
+                    {
+                        events |= movement(
+                            unsafe {
+                                world
+                                    .components
+                                    .positions
+                                    .get_unchecked_mut(holding_a.index)
+                            },
+                            unsafe { world.components.chunks.get_unchecked_mut(holding_a.index) },
+                            components::Direction::Up,
+                            adjustment_amount_a,
+                        );
+                    } else {
+                        unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
                     }
-                    if entity_b.has_holding() {
-                        let held_entity = unsafe { world.entities.get_unchecked_mut(holding_b.index) };
-                        if unsafe {
-                            world
-                                .generational_index_allocator
-                                .is_allocated_unchecked(*holding_b)
-                        } && held_entity.has_position()
-                            && held_entity.has_chunk()
-                        {
-                            events |= movement(
-                                unsafe {
-                                    world
-                                        .components
-                                        .positions
-                                        .get_unchecked_mut(holding_b.index)
-                                },
-                                unsafe { world.components.chunks.get_unchecked_mut(holding_b.index) },
-                                components::Direction::Down,
-                                adjustment_amount_b,
-                            );
-                        } else {
-                            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
-                        }
+                }
+                if entity_b.has_holding() {
+                    let held_entity = unsafe { world.entities.get_unchecked_mut(holding_b.index) };
+                    if unsafe {
+                        world
+                            .generational_index_allocator
+                            .is_allocated_unchecked(*holding_b)
+                    } && held_entity.has_position()
+                        && held_entity.has_chunk()
+                    {
+                        events |= movement(
+                            unsafe {
+                                world
+                                    .components
+                                    .positions
+                                    .get_unchecked_mut(holding_b.index)
+                            },
+                            unsafe { world.components.chunks.get_unchecked_mut(holding_b.index) },
+                            components::Direction::Down,
+                            adjustment_amount_b,
+                        );
+                    } else {
+                        unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
                     }
+                }
             }
             components::Direction::Left => {
                 let x_a =
@@ -809,74 +813,74 @@ fn collision_movables<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COUNT>
                     (x_b + bounding_box_b.offset_x as i16 + bounding_box_b.width as i16
                         - (x_a + bounding_box_a.offset_x as i16))
                         .unsigned_abs() as u8;
-                    let adjustment_amount_a = adjustment_amount / 2;
-                    let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
-    
-                    let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
-                    let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
-                    events |= movement(
-                        position_a,
-                        chunk_a,
-                        components::Direction::Right,
-                        adjustment_amount_a,
-                    );
-                    let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
-                    let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
-                    events |= movement(
-                        position_b,
-                        chunk_b,
-                        components::Direction::Left,
-                        adjustment_amount_b,
-                    );
+                let adjustment_amount_a = adjustment_amount / 2;
+                let adjustment_amount_b = adjustment_amount - adjustment_amount_a;
 
-                    if entity_a.has_holding() {
-                        let held_entity = unsafe { world.entities.get_unchecked_mut(holding_a.index) };
-                        if unsafe {
-                            world
-                                .generational_index_allocator
-                                .is_allocated_unchecked(*holding_a)
-                        } && held_entity.has_position()
-                            && held_entity.has_chunk()
-                        {
-                            events |= movement(
-                                unsafe {
-                                    world
-                                        .components
-                                        .positions
-                                        .get_unchecked_mut(holding_a.index)
-                                },
-                                unsafe { world.components.chunks.get_unchecked_mut(holding_a.index) },
-                                components::Direction::Right,
-                                adjustment_amount_a,
-                            );
-                        } else {
-                            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
-                        }
+                let position_a = unsafe { world.components.positions.get_unchecked_mut(index_a) };
+                let chunk_a = unsafe { world.components.chunks.get_unchecked_mut(index_a) };
+                events |= movement(
+                    position_a,
+                    chunk_a,
+                    components::Direction::Right,
+                    adjustment_amount_a,
+                );
+                let position_b = unsafe { world.components.positions.get_unchecked_mut(index_b) };
+                let chunk_b = unsafe { world.components.chunks.get_unchecked_mut(index_b) };
+                events |= movement(
+                    position_b,
+                    chunk_b,
+                    components::Direction::Left,
+                    adjustment_amount_b,
+                );
+
+                if entity_a.has_holding() {
+                    let held_entity = unsafe { world.entities.get_unchecked_mut(holding_a.index) };
+                    if unsafe {
+                        world
+                            .generational_index_allocator
+                            .is_allocated_unchecked(*holding_a)
+                    } && held_entity.has_position()
+                        && held_entity.has_chunk()
+                    {
+                        events |= movement(
+                            unsafe {
+                                world
+                                    .components
+                                    .positions
+                                    .get_unchecked_mut(holding_a.index)
+                            },
+                            unsafe { world.components.chunks.get_unchecked_mut(holding_a.index) },
+                            components::Direction::Right,
+                            adjustment_amount_a,
+                        );
+                    } else {
+                        unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
                     }
-                    if entity_b.has_holding() {
-                        let held_entity = unsafe { world.entities.get_unchecked_mut(holding_b.index) };
-                        if unsafe {
-                            world
-                                .generational_index_allocator
-                                .is_allocated_unchecked(*holding_b)
-                        } && held_entity.has_position()
-                            && held_entity.has_chunk()
-                        {
-                            events |= movement(
-                                unsafe {
-                                    world
-                                        .components
-                                        .positions
-                                        .get_unchecked_mut(holding_b.index)
-                                },
-                                unsafe { world.components.chunks.get_unchecked_mut(holding_b.index) },
-                                components::Direction::Left,
-                                adjustment_amount_b,
-                            );
-                        } else {
-                            unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
-                        }
+                }
+                if entity_b.has_holding() {
+                    let held_entity = unsafe { world.entities.get_unchecked_mut(holding_b.index) };
+                    if unsafe {
+                        world
+                            .generational_index_allocator
+                            .is_allocated_unchecked(*holding_b)
+                    } && held_entity.has_position()
+                        && held_entity.has_chunk()
+                    {
+                        events |= movement(
+                            unsafe {
+                                world
+                                    .components
+                                    .positions
+                                    .get_unchecked_mut(holding_b.index)
+                            },
+                            unsafe { world.components.chunks.get_unchecked_mut(holding_b.index) },
+                            components::Direction::Left,
+                            adjustment_amount_b,
+                        );
+                    } else {
+                        unsafe { world.entities.get_unchecked_mut(index_a) }.remove_holding();
                     }
+                }
             }
         }
     }
@@ -922,9 +926,11 @@ fn collision_damage<const ENTITY_COUNT: usize>(
                 .damage_invulnerability_timers
                 .get_unchecked_mut(index_b) = 60;
         }
-        if entity_a.has_accepts_input() && unsafe {world.components.accepts_input.get_unchecked(index_a)}.follows_player() {
-            *unsafe {world.entities.get_unchecked_mut(index_a)} |= Entity::RETREATING;
-            *unsafe {world.components.retreatings.get_unchecked_mut(index_a)} = 240;
+        if entity_a.has_accepts_input()
+            && unsafe { world.components.accepts_input.get_unchecked(index_a) }.follows_player()
+        {
+            *unsafe { world.entities.get_unchecked_mut(index_a) } |= Entity::RETREATING;
+            *unsafe { world.components.retreatings.get_unchecked_mut(index_a) } = 240;
         }
     }
 

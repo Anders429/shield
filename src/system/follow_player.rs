@@ -1,4 +1,9 @@
-use crate::{components, constants, events::Events, system::{find_pixel_difference, movement}, World};
+use crate::{
+    components, constants,
+    events::Events,
+    system::{find_pixel_difference, movement},
+    World,
+};
 use itertools::izip;
 
 pub(crate) fn follow_player<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COUNT>) -> Events {
@@ -7,7 +12,11 @@ pub(crate) fn follow_player<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_
     // Get player location.
     let mut player_position = components::Position::default();
     let mut player_chunk = components::Chunk::default();
-    for (entity, position, chunk) in izip!(world.entities.iter(), world.components.positions.iter(), world.components.chunks.iter()) {
+    for (entity, position, chunk) in izip!(
+        world.entities.iter(),
+        world.components.positions.iter(),
+        world.components.chunks.iter()
+    ) {
         if entity.is_player() && entity.has_position() && entity.has_chunk() {
             player_position = position.clone();
             player_chunk = chunk.clone();
@@ -15,10 +24,35 @@ pub(crate) fn follow_player<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_
         }
     }
 
-    for (entity, position, chunk, facing_direction, moving_direction, accepts_input, retreating) in izip!(world.entities.iter(), world.components.positions.iter_mut(), world.components.chunks.iter_mut(), world.components.facing_directions.iter_mut(), world.components.moving_directions.iter_mut(), world.components.accepts_input.iter(), world.components.retreatings.iter()) {
-        if entity.has_accepts_input() && accepts_input.follows_player() && entity.has_position() && entity.has_chunk() && entity.has_facing_direction() {
-            let mut x_delta = find_pixel_difference(position.x, chunk.x, player_position.x, player_chunk.x, constants::CHUNK_WIDTH);
-            let mut y_delta = find_pixel_difference(position.y, chunk.y, player_position.y, player_chunk.y, constants::CHUNK_HEIGHT);
+    for (entity, position, chunk, facing_direction, moving_direction, accepts_input, retreating) in izip!(
+        world.entities.iter(),
+        world.components.positions.iter_mut(),
+        world.components.chunks.iter_mut(),
+        world.components.facing_directions.iter_mut(),
+        world.components.moving_directions.iter_mut(),
+        world.components.accepts_input.iter(),
+        world.components.retreatings.iter()
+    ) {
+        if entity.has_accepts_input()
+            && accepts_input.follows_player()
+            && entity.has_position()
+            && entity.has_chunk()
+            && entity.has_facing_direction()
+        {
+            let mut x_delta = find_pixel_difference(
+                position.x,
+                chunk.x,
+                player_position.x,
+                player_chunk.x,
+                constants::CHUNK_WIDTH,
+            );
+            let mut y_delta = find_pixel_difference(
+                position.y,
+                chunk.y,
+                player_position.y,
+                player_chunk.y,
+                constants::CHUNK_HEIGHT,
+            );
 
             if entity.has_retreating() {
                 if *retreating > 0 {

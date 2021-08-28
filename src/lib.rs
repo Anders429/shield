@@ -214,7 +214,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::player()
                 | Entity::walking_timer()
                 | Entity::walking_animation_state()
-                | Entity::generation();
+                | Entity::generation()
+                | Entity::moving_direction();
 
             *self
                 .components
@@ -275,6 +276,10 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .generations
                 .get_unchecked_mut(generational_index.index) = generational_index.generation;
+            *self
+                .components
+                .moving_directions
+                .get_unchecked_mut(generational_index.index) = components::Direction::Down;
         }
 
         Some(generational_index)
@@ -389,10 +394,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
             *self
                 .components
                 .health_points
-                .get_unchecked_mut(generational_index.index) = components::HealthPoints {
-                    current: 2,
-                    max: 2,
-                };
+                .get_unchecked_mut(generational_index.index) =
+                components::HealthPoints { current: 2, max: 2 };
             *self
                 .components
                 .bounding_boxes
@@ -410,9 +413,19 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .components
                 .generations
                 .get_unchecked_mut(generational_index.index) = generational_index.generation;
-            *self.components.facing_directions.get_unchecked_mut(generational_index.index) = components::Direction::Down;
-            *self.components.accepts_input.get_unchecked_mut(generational_index.index) = components::AcceptsInput::FollowsPlayer;
-            *self.components.moving_directions.get_unchecked_mut(generational_index.index) = components::Direction::Down;
+            *self
+                .components
+                .facing_directions
+                .get_unchecked_mut(generational_index.index) = components::Direction::Down;
+            *self
+                .components
+                .accepts_input
+                .get_unchecked_mut(generational_index.index) =
+                components::AcceptsInput::FollowsPlayer;
+            *self
+                .components
+                .moving_directions
+                .get_unchecked_mut(generational_index.index) = components::Direction::Down;
         }
 
         Some(generational_index)
