@@ -287,8 +287,7 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::spritesheet_1x1()
                 | Entity::palette()
                 | Entity::generation()
-                | Entity::holdable()
-                ;
+                | Entity::holdable();
 
             *self
                 .components
@@ -323,7 +322,10 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 color_b: data::colors::SKYBLUE,
                 color_c: data::colors::VOID,
             };
-            *self.components.generations.get_unchecked_mut(generational_index.index) = generational_index.generation;
+            *self
+                .components
+                .generations
+                .get_unchecked_mut(generational_index.index) = generational_index.generation;
         }
 
         Some(generational_index)
@@ -362,12 +364,21 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         Some(generational_index)
     }
 
-    pub(crate) fn register_grab(&mut self, position: components::Position, chunk: components::Chunk, bounding_box: components::BoundingBox, grabber: components::EntityReference) -> Option<GenerationalIndex> {
+    pub(crate) fn register_grab(
+        &mut self,
+        position: components::Position,
+        chunk: components::Chunk,
+        bounding_box: components::BoundingBox,
+        grabber: components::EntityReference,
+    ) -> Option<GenerationalIndex> {
         let generational_index = self.generational_index_allocator.allocate()?;
 
         unsafe {
-            *self.entities.get_unchecked_mut(generational_index.index) =
-                Entity::position() | Entity::chunk() | Entity::bounding_box() | Entity::grab() | Entity::generation();
+            *self.entities.get_unchecked_mut(generational_index.index) = Entity::position()
+                | Entity::chunk()
+                | Entity::bounding_box()
+                | Entity::grab()
+                | Entity::generation();
 
             *self
                 .components

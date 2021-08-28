@@ -232,9 +232,9 @@ impl Entity {
         self.remove(Self::WALKING)
     }
 
-    pub(crate) fn remove_moving_direction(&mut self) {
-        self.remove(Self::MOVING_DIRECTION)
-    }
+    // pub(crate) fn remove_moving_direction(&mut self) {
+    //     self.remove(Self::MOVING_DIRECTION)
+    // }
 
     pub(crate) fn remove_damage_invulnerability_timer(&mut self) {
         self.remove(Self::DAMAGE_INVULNERABILITY_TIMER)
