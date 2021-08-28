@@ -1,3 +1,5 @@
+#![feature(unboxed_closures)]
+
 pub mod constants;
 pub mod data;
 
@@ -101,6 +103,9 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
 
         if let None = self.register_player() {
             return Err(anyhow::format_err!("Unable to register player."));
+        }
+        if let None = self.register_shield() {
+            return Err(anyhow::format_err!("Unable to register shield."));
         }
         self.resources.chunk = constants::STARTING_CHUNK;
         self.resources.position = constants::STARTING_POSITION;
@@ -257,6 +262,56 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         Some(generational_index)
     }
 
+    pub(crate) fn register_shield(&mut self) -> Option<GenerationalIndex> {
+        let generational_index = self.generational_index_allocator.allocate()?;
+
+        unsafe {
+            // SAFETY: The index here will always be within the bounds of ENTITY_COUNT.
+            *self.entities.get_unchecked_mut(generational_index.index) = Entity::position()
+                | Entity::bounding_box()
+                | Entity::facing_direction()
+                | Entity::chunk()
+                | Entity::spritesheet_1x1()
+                | Entity::palette();
+
+            *self
+                .components
+                .positions
+                .get_unchecked_mut(generational_index.index) = constants::STARTING_POSITION;
+            *self
+                .components
+                .bounding_boxes
+                .get_unchecked_mut(generational_index.index) = components::BoundingBox {
+                width: 16,
+                height: 16,
+                offset_x: 0,
+                offset_y: 0,
+            };
+            *self
+                .components
+                .facing_directions
+                .get_unchecked_mut(generational_index.index) = components::Direction::Down;
+            *self
+                .components
+                .chunks
+                .get_unchecked_mut(generational_index.index) = constants::STARTING_CHUNK;
+            *self
+                .components
+                .spritesheets_1x1
+                .get_unchecked_mut(generational_index.index) = Some(&data::spritesheets::SHIELD);
+            *self
+                .components
+                .palettes
+                .get_unchecked_mut(generational_index.index) = components::sprite::Palette {
+                color_a: data::colors::BROWN,
+                color_b: data::colors::SKYBLUE,
+                color_c: data::colors::VOID,
+            };
+        }
+
+        Some(generational_index)
+    }
+
     pub(crate) fn register_tile(
         &mut self,
         tile: &'a Tile<'a>,
@@ -306,10 +361,6 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
         let mut events = Events::default();
 
         events |= system::event_handler(event_pump);
-
-        // if let Some(input) = events.unwrap_input() {
-        //     events |= system::player_input(self, input);
-        // }
         events |= system::player_input(self, events.unwrap_input().unwrap_or(Input::default()));
 
         events |= system::toggle_walking_animation_state(self);

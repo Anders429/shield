@@ -22,3 +22,26 @@ pub(crate) static PLAYER: SpriteSheet<1, 1> = SpriteSheet {
         [[&super::sprites::PLAYER_LEFT_C]],
     ],
 };
+
+pub(crate) static SHIELD: SpriteSheet<1, 1> = SpriteSheet {
+    up: [
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+    ],
+    right: [
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+    ],
+    down: [
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+    ],
+    left: [
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+        [[&super::sprites::SHIELD_DOWN]],
+    ],
+};

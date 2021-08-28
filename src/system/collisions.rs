@@ -197,16 +197,20 @@ fn collision_damage<const ENTITY_COUNT: usize>(
     let entity_a = unsafe { world.entities.get_unchecked(index_a) }.clone();
     let entity_b = unsafe { world.entities.get_unchecked_mut(index_b) };
 
-    if entity_a.has_damage() && entity_b.has_health_points() && !entity_b.has_damage_invulnerability_timer() {
+    if entity_a.has_damage()
+        && entity_b.has_health_points()
+        && !entity_b.has_damage_invulnerability_timer()
+    {
         unsafe {
-            let health_points = world
-            .components
-            .health_points
-            .get_unchecked_mut(index_b);
-            health_points
-                .current = health_points.current.saturating_sub(*world.components.damages.get_unchecked(index_a));
+            let health_points = world.components.health_points.get_unchecked_mut(index_b);
+            health_points.current = health_points
+                .current
+                .saturating_sub(*world.components.damages.get_unchecked(index_a));
             *entity_b |= Entity::damage_invulnerability_timer();
-            *world.components.damage_invulnerability_timers.get_unchecked_mut(index_b) = 60;
+            *world
+                .components
+                .damage_invulnerability_timers
+                .get_unchecked_mut(index_b) = 60;
         }
     }
 

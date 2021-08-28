@@ -1,7 +1,7 @@
 use crate::{
     components, constants, data,
     events::Events,
-    system::{self, find_pixel_difference},
+    system::{self, display_sort, find_pixel_difference},
     World,
 };
 use anyhow::anyhow;
@@ -29,52 +29,61 @@ where
 {
     let mut events = Events::default();
 
-    for (entity, position, chunk, spritesheet_1x1, palette, walking_animation_state) in izip!(
-        world.entities.iter(),
-        world.components.positions.iter(),
-        world.components.chunks.iter(),
-        world.components.spritesheets_1x1.iter(),
-        world.components.palettes.iter(),
-        world.components.walking_animation_states.iter(),
-    ) {
-        if entity.has_position()
-            && entity.has_chunk()
-            && entity.has_spritesheet_1x1()
-            && entity.has_palette()
-        {
-            let x = find_pixel_difference(
-                position.x,
-                chunk.x,
-                world.resources.position.x,
-                world.resources.chunk.x,
-                constants::CHUNK_WIDTH,
-            ) + constants::SCREEN_WIDTH as i16 / 2;
-            let y = find_pixel_difference(
-                position.y,
-                chunk.y,
-                world.resources.position.y,
-                world.resources.chunk.y,
-                constants::CHUNK_HEIGHT,
-            ) + constants::SCREEN_HEIGHT as i16 / 2;
-
-            // Just draw up for now.
-            events |= system::display_sprite(
-                unsafe {
-                    *spritesheet_1x1
-                        .unwrap()
-                        .down
-                        .get_unchecked(0)
-                        .get_unchecked(0)
-                        .get_unchecked(walking_animation_state.to_index())
-                },
-                *palette,
-                x as i32,
-                y as i32,
-                canvas,
-                texture_creator,
-                texture_cache,
-            );
+    for index in display_sort(world, |(index, entity)| {
+        if entity.has_spritesheet_1x1() && entity.has_palette() {
+            Some(index)
+        } else {
+            None
         }
+    }) {
+        let entity = unsafe { world.entities.get_unchecked(index) };
+        let position = unsafe { world.components.positions.get_unchecked(index) };
+        let chunk = unsafe { world.components.chunks.get_unchecked(index) };
+        let spritesheet_1x1 = unsafe { world.components.spritesheets_1x1.get_unchecked(index) };
+        let palette = unsafe { world.components.palettes.get_unchecked(index) };
+        let walking_animation_state = if entity.has_walking_animation_state() {
+            *unsafe {
+                world
+                    .components
+                    .walking_animation_states
+                    .get_unchecked(index)
+            }
+        } else {
+            components::WalkingAnimationState::default()
+        };
+
+        let x = find_pixel_difference(
+            position.x,
+            chunk.x,
+            world.resources.position.x,
+            world.resources.chunk.x,
+            constants::CHUNK_WIDTH,
+        ) + constants::SCREEN_WIDTH as i16 / 2;
+        let y = find_pixel_difference(
+            position.y,
+            chunk.y,
+            world.resources.position.y,
+            world.resources.chunk.y,
+            constants::CHUNK_HEIGHT,
+        ) + constants::SCREEN_HEIGHT as i16 / 2;
+
+        // Just draw up for now.
+        events |= system::display_sprite(
+            unsafe {
+                *spritesheet_1x1
+                    .unwrap()
+                    .down
+                    .get_unchecked(0)
+                    .get_unchecked(0)
+                    .get_unchecked(walking_animation_state.to_index())
+            },
+            *palette,
+            x as i32,
+            y as i32,
+            canvas,
+            texture_creator,
+            texture_cache,
+        );
     }
 
     events
