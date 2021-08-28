@@ -15,7 +15,8 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
 ) -> Events {
     let mut events = Events::default();
 
-    let mut deferred_executions: Vec<Box<dyn Fn(&mut World<ENTITY_COUNT>) -> Events>> = Vec::new();
+    // This is used for held entites, to avoid having double mut aliases. Defers a system execution to the end.
+    let mut deferred_executions: Vec<Box<dyn FnMut(&mut World<ENTITY_COUNT>) -> Events>> = Vec::new();
 
     for (index, (
         entity,
@@ -173,18 +174,94 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
             if rotation_needed {
                 if input.has_up() {
                     events |= rotate(facing_direction, components::Direction::Up);
+                    if entity.has_holding() {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                            let mut events = Events::default();
+
+                            let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                                events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Up);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Up, 6);
+                                unsafe {
+                                    *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                    *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                }
+                            } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                                unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                            }
+                                
+                            events
+                        })));
+                    }
                 } else if input.has_right() {
                     events |= rotate(facing_direction, components::Direction::Right);
+                    if entity.has_holding() {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                            let mut events = Events::default();
+
+                            let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                                events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Right);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Right, 6);
+                                unsafe {
+                                    *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                    *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                }
+                            } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                                unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                            }
+                                
+                            events
+                        })));
+                    }
                 } else if input.has_down() {
                     events |= rotate(facing_direction, components::Direction::Down);
+                    if entity.has_holding() {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                            let mut events = Events::default();
+
+                            let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                                events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Down);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Down, 6);
+                                unsafe {
+                                    *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                    *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                }
+                            } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                                unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                            }
+                                
+                            events
+                        })));
+                    }
                 } else if input.has_left() {
                     events |= rotate(facing_direction, components::Direction::Left);
+                    if entity.has_holding() {
+                        deferred_executions.push(Box::new(enclose!((holding, index, generation, mut position, mut chunk) move |world: &mut World<ENTITY_COUNT>| {
+                            let mut events = Events::default();
+
+                            let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
+                            if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() && held_entity.has_facing_direction() {
+                                events |= rotate(unsafe {world.components.facing_directions.get_unchecked_mut(holding.index)}, components::Direction::Left);
+                                events |= movement(&mut position, &mut chunk, components::Direction::Left, 6);
+                                unsafe {
+                                    *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                    *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                                }
+                            } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
+                                unsafe {world.entities.get_unchecked_mut(index)}.remove_holding();
+                            }
+                                
+                            events
+                        })));
+                    }
                 }
             }
         }
     }
 
-    for deferred_execution in deferred_executions {
+    for mut deferred_execution in deferred_executions {
         events |= deferred_execution(world);
     }
 

@@ -75,9 +75,9 @@ pub(crate) fn collisions<const ENTITY_COUNT: usize>(world: &mut World<ENTITY_COU
                     find_pixel_difference(position_b.y, chunk_b.y, 0, 0, constants::CHUNK_HEIGHT)
                         as u16;
 
-                let start_a = position_a.y + bounding_box_a.offset_y as u16;
+                let start_a = y_a + bounding_box_a.offset_y as u16;
                 let end_a = start_a + bounding_box_a.height as u16;
-                let start_b = position_b.y + bounding_box_b.offset_y as u16;
+                let start_b = y_b + bounding_box_b.offset_y as u16;
                 let end_b = start_b + bounding_box_b.height as u16;
                 if (start_a < end_b && end_a > start_b) || (end_b < start_a && start_b > end_a) {
                     collisions.push((index_a, index_b));

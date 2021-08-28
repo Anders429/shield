@@ -205,7 +205,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 | Entity::player()
                 | Entity::walking_timer()
                 | Entity::walking_animation_state()
-                | Entity::generation();
+                | Entity::generation()
+                | Entity::holding(); // Temporary
 
             *self
                 .components
@@ -263,6 +264,8 @@ impl<'a, const ENTITY_COUNT: usize> World<'a, ENTITY_COUNT> {
                 .get_unchecked_mut(generational_index.index) =
                 components::WalkingAnimationState::StandingA;
             *self.components.generations.get_unchecked_mut(generational_index.index) = generational_index.generation;
+            // Temporary
+            *self.components.holdings.get_unchecked_mut(generational_index.index) = GenerationalIndex {index: 1, generation: 0};
         }
 
         Some(generational_index)
