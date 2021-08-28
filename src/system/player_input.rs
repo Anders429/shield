@@ -54,13 +54,18 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Up, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Up;
-                if entity.has_holding() {
-                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                if entity.has_holding() && entity.has_facing_direction() {
+                    deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
                         let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                         if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
-                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Up, speed);
+                            events |= movement(&mut position, &mut chunk, facing_direction, 6);
+                            unsafe {
+                                *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                            }
+
                             *held_entity |= Entity::moving_direction();
                             *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Up;
                         } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
@@ -74,13 +79,18 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Right, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Right;
-                if entity.has_holding() {
-                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                if entity.has_holding() && entity.has_facing_direction() {
+                    deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
                         let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                         if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
-                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Right, speed);
+                            events |= movement(&mut position, &mut chunk, facing_direction, 6);
+                            unsafe {
+                                *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                            }
+
                             *held_entity |= Entity::moving_direction();
                             *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Right;
                         } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
@@ -94,13 +104,18 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Down, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Down;
-                if entity.has_holding() {
-                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                if entity.has_holding() && entity.has_facing_direction() {
+                    deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
                         let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                         if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
-                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Down, speed);
+                            events |= movement(&mut position, &mut chunk, facing_direction, 6);
+                            unsafe {
+                                *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                            }
+
                             *held_entity |= Entity::moving_direction();
                             *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Down;
                         } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
@@ -114,13 +129,18 @@ pub(crate) fn player_input<const ENTITY_COUNT: usize>(
                 events |= movement(position, chunk, components::Direction::Left, *speed);
                 *entity |= Entity::walking() | Entity::moving_direction();
                 *moving_direction = components::Direction::Left;
-                if entity.has_holding() {
-                    deferred_executions.push(Box::new(enclose!((holding, speed, generation, index) move |world: &mut World<ENTITY_COUNT>| {
+                if entity.has_holding() && entity.has_facing_direction() {
+                    deferred_executions.push(Box::new(enclose!((holding, generation, index, mut position, mut chunk, facing_direction) move |world: &mut World<ENTITY_COUNT>| {
                         let mut events = Events::default();
 
                         let held_entity = unsafe {world.entities.get_unchecked_mut(holding.index)};
                         if unsafe {world.generational_index_allocator.is_allocated_unchecked(holding)} && held_entity.has_position() && held_entity.has_chunk() {
-                            events |= movement(unsafe {world.components.positions.get_unchecked_mut(holding.index)}, unsafe {world.components.chunks.get_unchecked_mut(holding.index)}, components::Direction::Left, speed);
+                            events |= movement(&mut position, &mut chunk, facing_direction, 6);
+                            unsafe {
+                                *world.components.positions.get_unchecked_mut(holding.index) = position;
+                                *world.components.chunks.get_unchecked_mut(holding.index) = chunk;
+                            }
+
                             *held_entity |= Entity::moving_direction();
                             *unsafe{world.components.moving_directions.get_unchecked_mut(holding.index)} = components::Direction::Left;
                         } else if unsafe {world.generational_index_allocator.is_allocated_unchecked(GenerationalIndex {index, generation})} {
