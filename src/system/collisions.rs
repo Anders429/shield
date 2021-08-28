@@ -558,6 +558,16 @@ fn collision_damage<const ENTITY_COUNT: usize>(
         && entity_b.has_health_points()
         && !entity_b.has_damage_invulnerability_timer()
     {
+        if entity_b.has_holding() {
+            let holding = unsafe {world.components.holdings.get_unchecked(index_b)};
+            if unsafe {world.generational_index_allocator.is_allocated_unchecked(*holding)} {
+                if holding.index == index_b {
+                    return Events::default()
+                }
+            } else {
+                // Should remove it here, but that's a headache. TODO.
+            }
+        }
         unsafe {
             let health_points = world.components.health_points.get_unchecked_mut(index_b);
             health_points.current = health_points
